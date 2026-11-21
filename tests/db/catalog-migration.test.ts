@@ -98,6 +98,10 @@ describe.skipIf(!ready)("catalog reorganization script", () => {
     const { data: created } = await db.from("catalog_items").select("name").eq("team_id", teamId).eq("name", 'Short Bit — Masonry — 1/4"');
     expect(created).toHaveLength(1);
 
+    // Renamed product keeps its id.
+    const { data: bconn } = await db.from("catalog_items").select("name, icon").eq("id", ids.get("Dolphin Beans")!).single();
+    expect(bconn).toEqual({ name: "B Connectors", icon: "b-connector" });
+
     const { data: zip } = await db.from("catalog_items").select("id, icon, group_id").eq("id", ids.get("Zip Ties")!).single();
     expect(zip).toMatchObject({ icon: "zip-tie", group_id: null });
 

@@ -6,6 +6,7 @@ export const SUPPLY_ICON_KEYS = [
   "hole-saw",
   "spade-bit",
   "rj45",
+  "b-connector",
   "gel-connector",
   "wire-nut",
   "tape",

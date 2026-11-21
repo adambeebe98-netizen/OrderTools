@@ -90,7 +90,7 @@ OBSOLETE = ['Short Wood Bit 1/4"']
 STANDALONE = [
     ("3 ft Flex Bit", "Drill Bits", "flex-bit"),
     ("RJ45 Connectors", "Wiring & Connectors", "rj45"),
-    ("Dolphin Beans", "Wiring & Connectors", "gel-connector"),
+    ("B Connectors", "Wiring & Connectors", "b-connector"),
     ("Wire Nuts", "Wiring & Connectors", "wire-nut"),
     ("Electrical Tape", "Wiring & Connectors", "tape"),
     ("Zip Ties", "Wiring & Connectors", "zip-tie"),
@@ -105,6 +105,11 @@ STANDALONE = [
     ("Power Strip", "Power", "power-strip"),
 ]
 
+
+# Standalone items renamed since the original import: new name -> (old names, unit, description)
+RENAMED = {
+    "B Connectors": (["Dolphin Beans"], "bag", "Plain (dry) crimp splice connectors for low-voltage alarm wire"),
+}
 
 # Standalone items that weren't in the original import: name -> (unit, description)
 NEW_ITEMS = {"3 ft Flex Bit": ("each", "3-foot flexible installer bit")}

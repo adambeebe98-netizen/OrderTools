@@ -84,8 +84,21 @@ const ICONS = {
       </>
     ),
   },
+  "b-connector": {
+    label: "B connector (crimp splice)",
+    // Small crimp barrel seen slightly from the side: round open end on the left,
+    // rounded closed end on the right, crimp notches, two wires going in.
+    d: (
+      <>
+        <ellipse cx="9" cy="12" rx="1.75" ry="3.5" />
+        <path d="M9 8.5h8.5a3.5 3.5 0 0 1 0 7H9" />
+        <path d="M14 8.5V10M14 14v1.5" />
+        <path d="M2.5 10.75h6M2.5 13.25h6" />
+      </>
+    ),
+  },
   "gel-connector": {
-    label: "Dolphin bean (gel crimp connector)",
+    label: "Gel-filled crimp connector",
     // B-connector "beanie": a small capsule pinched by the crimp, two wires in one end.
     d: (
       <>
@@ -160,16 +173,18 @@ const ICONS = {
     ),
   },
   sign: {
-    label: "Yard sign",
+    label: "Round yard sign",
+    // Round placard on a single stake, with a small house mark instead of a logo.
     d: (
       <>
-        <rect x="3.5" y="2.5" width="17" height="10.5" rx="1.5" />
-        <path d="M7.5 6.25h9M7.5 9.5H13" />
-        <path d="M8.5 13v7.5M15.5 13v7.5" />
-        <path d="M5 20.5h14" />
+        <circle cx="12" cy="9" r="6.5" />
+        <path d="M9.25 11V9.25L12 6.75l2.75 2.5V11z" />
+        <path d="M12 15.5v5.5" />
+        <path d="M8.5 21h7" />
       </>
     ),
   },
+
   raceway: {
     label: "Raceway",
     // Long channel seen from one end, with a wire coming out of it.

@@ -5,7 +5,7 @@ reorganize_sql(slug) is also imported by gen-seed.py for local data.
 """
 import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from catalog_def import CATEGORIES, GROUPS, OBSOLETE, STANDALONE, FLAT_CATALOG, NEW_ITEMS, variant_name
+from catalog_def import CATEGORIES, GROUPS, OBSOLETE, STANDALONE, FLAT_CATALOG, NEW_ITEMS, RENAMED, variant_name
 
 def definition():
     flat = {n: (u, d) for n, _, u, d in FLAT_CATALOG}
@@ -26,8 +26,11 @@ def definition():
         ],
         "obsolete": OBSOLETE,
         "standalone": [
-            {"name": n, "category": c, "icon": icon, "unit": flat.get(n, ("each", None))[0],
-             "description": flat.get(n, ("each", None))[1], "sort_order": 100 + k}
+            {"name": n, "category": c, "icon": icon,
+             "legacy_names": RENAMED[n][0] if n in RENAMED else [],
+             "unit": RENAMED[n][1] if n in RENAMED else flat.get(n, ("each", None))[0],
+             "description": RENAMED[n][2] if n in RENAMED else flat.get(n, ("each", None))[1],
+             "rename": n in RENAMED, "sort_order": 100 + k}
             for k, (n, c, icon) in enumerate(STANDALONE)
         ],
     }
@@ -152,15 +155,19 @@ begin
   for s in select * from jsonb_array_elements(v_def -> 'standalone') loop
     select id into v_cat from public.categories where team_id = v_team and lower(name) = lower(s ->> 'category');
     select id into v_item from public.catalog_items
-     where team_id = v_team and group_id is null and lower(name) = lower(s ->> 'name')
-     order by archived_at nulls first, created_at limit 1;
+     where team_id = v_team and group_id is null
+       and (lower(name) = lower(s ->> 'name')
+            or lower(name) in (select lower(x) from jsonb_array_elements_text(coalesce(s -> 'legacy_names', '[]'::jsonb)) x))
+     order by (lower(name) = lower(s ->> 'name')) desc, archived_at nulls first, created_at limit 1;
     if v_item is null then
       insert into public.catalog_items (team_id, category_id, name, unit, description, icon, sort_order)
       values (v_team, v_cat, s ->> 'name', s ->> 'unit', s ->> 'description', s ->> 'icon', (s ->> 'sort_order')::int);
       v_created := v_created + 1;
     else
       update public.catalog_items
-         set icon = s ->> 'icon', category_id = coalesce(category_id, v_cat), sort_order = (s ->> 'sort_order')::int
+         set icon = s ->> 'icon', category_id = coalesce(category_id, v_cat), sort_order = (s ->> 'sort_order')::int,
+             name = case when (s ->> 'rename')::boolean then s ->> 'name' else name end,
+             description = case when (s ->> 'rename')::boolean then s ->> 'description' else description end
        where id = v_item;
       v_updated := v_updated + 1;
     end if;
