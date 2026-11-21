@@ -98,6 +98,10 @@ Database tests run against the local Supabase stack and are skipped when it isn'
 
 ### 3. Create the first admin and team
 
+**No command line:** in Supabase, go to Authentication → Users → Add user (tick *Auto Confirm User*). Then open the SQL Editor, paste [`supabase/setup-first-admin.sql`](supabase/setup-first-admin.sql), change the email and team name at the top, and click Run. (If you didn't use `supabase db push`, first paste and run `supabase/migrations/20261121000000_init.sql` the same way.)
+
+**Or with the script:**
+
 ```bash
 node --env-file=.env.production.local node_modules/.bin/tsx scripts/bootstrap.mts \
   --email you@company.com --password 'a-long-password' --name "Your Name" --team "North Install Team"
