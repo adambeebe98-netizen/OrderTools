@@ -7,6 +7,8 @@
  * object holds a value per attribute (e.g. { Type: "Masonry", Size: '3/8"' }).
  */
 
+import type { SupplyIconKey } from "@/lib/icon-names";
+
 export type Attributes = Record<string, string>;
 
 export type VariantLike = { id: string; attributes: Attributes; sort_order?: number };
@@ -85,6 +87,50 @@ export function resolveSelection(
       ? (candidates.find((v) => attributeNames.every((n) => (v.attributes[n] ?? null) === (next[n] ?? null))) ?? candidates[0])
       : null;
   return { selection: next, variant, steps };
+}
+
+/**
+ * Icon for one variant. Variants don't store an icon of their own (the group
+ * owns it), so the group's icon is refined by what the variant is: a masonry
+ * option in a twist-bit group shows the masonry bit, letting technicians tell
+ * "Long Bit — Masonry" from "Long Bit — Wood" at a glance.
+ */
+export function variantIcon(groupIcon: string | null | undefined, attributes: Attributes): string | null {
+  if (groupIcon === "drill-bit" && Object.values(attributes).some((value) => /masonry|concrete|brick/i.test(value))) {
+    return "masonry-bit" satisfies SupplyIconKey;
+  }
+  return groupIcon ?? null;
+}
+
+/** One icon standing for several variants: theirs when they all look alike, otherwise the group's own. */
+export function sharedIcon(groupIcon: string | null | undefined, variants: Pick<VariantLike, "attributes">[]): string | null {
+  const icons = new Set(variants.map((v) => variantIcon(groupIcon, v.attributes)));
+  return icons.size === 1 ? [...icons][0] : (groupIcon ?? null);
+}
+
+/**
+ * Icon per option of attribute `index`, for options that look different from
+ * each other (Wood vs Masonry). Null when every option shares one icon, so
+ * those buttons stay plain text.
+ */
+export function optionIcons(
+  groupIcon: string | null | undefined,
+  variants: VariantLike[],
+  attributeNames: string[],
+  selection: Attributes,
+  index: number,
+): Record<string, string | null> | null {
+  const name = attributeNames[index];
+  const earlier = attributeNames.slice(0, index);
+  const pool = variants.filter((v) => matches(v, selection, earlier));
+  const icons: Record<string, string | null> = {};
+  for (const option of optionsFor(variants, attributeNames, selection, index)) {
+    icons[option] = sharedIcon(
+      groupIcon,
+      pool.filter((v) => v.attributes[name] === option),
+    );
+  }
+  return new Set(Object.values(icons)).size > 1 ? icons : null;
 }
 
 /** Parse "Type: Masonry | Size: 3/8\"" (CSV) into an attributes object + ordered names. */

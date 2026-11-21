@@ -1,5 +1,12 @@
 # Handoff: redesign the supply icons
 
+> **Done.** This brief is kept for the reasoning behind each drawing. Where the shipped icons differ from it:
+>
+> - **19 icons, not 16.** Added `masonry-bit`, `flex-bit` and `mounting-tape`, because those products don't look like a twist bit or a plain tape roll.
+> - **Masonry variants show the masonry bit.** Variants have no icon of their own, so `variantIcon()` in `src/lib/variants.ts` refines a `drill-bit` group's icon when an option says Masonry. The technician sheet shows it on the Type buttons and in the header.
+> - **Hole saw is upright**, not diagonal: its tooth edge only reads as teeth when it is level.
+> - **Dolphin bean** is drawn as the capsule-shaped B-connector ("beanie") alarm installers crimp, not the button-top UY connector described in §3.
+
 You're picking up a small, self-contained design + code task in an existing Next.js app (OrderTools, a supply request portal for smart-home installation technicians). Technicians open it on their phones, tap a category, and tap **+** next to supplies. Every product shows a small line icon. The current icons were drawn quickly, and several don't look like the real object (the Speedbor is the worst: it reads as a shield, not a spade bit). **Your job: redesign all 16 icons so each one is an honest, instantly recognizable, minimal line drawing of the real object, then implement and ship them.**
 
 Spend your effort on the drawing. The code change itself is one file.

@@ -64,7 +64,7 @@ GROUPS = [
         ],
     },
     {
-        "name": "Extra-Long Bit", "category": "Drill Bits", "icon": "drill-bit",
+        "name": "Extra-Long Bit", "category": "Drill Bits", "icon": "masonry-bit",
         "description": "For thick walls", "attributes": ["Type", "Size"],
         "variants": [
             ({"Type": "Masonry", "Size": '3/8"'}, ['Extra-Long Masonry Bit 3/8"'], "each", "Extra-long carbide bit for thick walls"),
@@ -88,7 +88,7 @@ OBSOLETE = ['Short Wood Bit 1/4"']
 
 # Standalone (no variants) items: name -> icon. Order = display order within the category.
 STANDALONE = [
-    ("3 ft Flex Bit", "Drill Bits", "drill-bit"),
+    ("3 ft Flex Bit", "Drill Bits", "flex-bit"),
     ("RJ45 Connectors", "Wiring & Connectors", "rj45"),
     ("Dolphin Beans", "Wiring & Connectors", "gel-connector"),
     ("Wire Nuts", "Wiring & Connectors", "wire-nut"),
@@ -98,7 +98,7 @@ STANDALONE = [
     ("Screws", "Mounting & Sealing", "screw"),
     ("Sign Hardware", "Mounting & Sealing", "sign"),
     ("Raceway", "Mounting & Sealing", "raceway"),
-    ("Double-Sided Mounting Tape", "Mounting & Sealing", "tape"),
+    ("Double-Sided Mounting Tape", "Mounting & Sealing", "mounting-tape"),
     ("Silicone Sealant", "Mounting & Sealing", "caulk-tube"),
     ("Putty", "Mounting & Sealing", "putty"),
     ("3-Way Plug Splitter", "Power", "splitter"),

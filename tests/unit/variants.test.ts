@@ -3,12 +3,16 @@ import {
   cleanAttributes,
   formatAttributeString,
   groupSummary,
+  optionIcons,
   optionsFor,
   parseAttributeString,
   resolveSelection,
   sameAttributes,
+  sharedIcon,
+  variantIcon,
   variantName,
 } from "@/lib/variants";
+import { SUPPLY_ICON_KEYS } from "@/lib/icon-names";
 import { catalogToCsv, parseCatalogCsv } from "@/lib/csv";
 
 const attrs = ["Type", "Size"];
@@ -25,6 +29,37 @@ const shortBit = [
   { id: "sw38", attributes: { Type: "Wood", Size: '3/8"' }, sort_order: 0 },
   { id: "sm14", attributes: { Type: "Masonry", Size: '1/4"' }, sort_order: 1 },
 ];
+
+describe("variant icons", () => {
+  it("shows the masonry bit for masonry variants of a twist-bit group", () => {
+    expect(variantIcon("drill-bit", { Type: "Masonry", Size: '3/8"' })).toBe("masonry-bit");
+    expect(variantIcon("drill-bit", { Type: "Wood", Size: '3/8"' })).toBe("drill-bit");
+    expect(SUPPLY_ICON_KEYS).toContain(variantIcon("drill-bit", { Type: "Masonry" }));
+  });
+
+  it("leaves every other group's icon alone", () => {
+    expect(variantIcon("screw", { Type: "Masonry" })).toBe("screw");
+    expect(variantIcon("hole-saw", { Size: '3/4"' })).toBe("hole-saw");
+    expect(variantIcon(null, { Type: "Masonry" })).toBeNull();
+    expect(variantIcon(undefined, {})).toBeNull();
+  });
+
+  it("gives a group card the icon its variants share, else the group's own", () => {
+    const masonryOnly = longBit.filter((v) => v.attributes.Type === "Masonry");
+    expect(sharedIcon("drill-bit", masonryOnly)).toBe("masonry-bit");
+    expect(sharedIcon("drill-bit", longBit)).toBe("drill-bit");
+    expect(sharedIcon("drill-bit", [])).toBe("drill-bit");
+    expect(sharedIcon(null, longBit)).toBeNull();
+  });
+
+  it("puts icons on option buttons only when the options look different", () => {
+    expect(optionIcons("drill-bit", longBit, attrs, {}, 0)).toEqual({ Wood: "drill-bit", Masonry: "masonry-bit" });
+    // Sizes of one type all look the same, so those buttons stay plain.
+    expect(optionIcons("drill-bit", longBit, attrs, { Type: "Masonry" }, 1)).toBeNull();
+    expect(optionIcons("drill-bit", longBit, attrs, { Type: "Wood" }, 1)).toBeNull();
+    expect(optionIcons("zip-tie", longBit, attrs, {}, 0)).toBeNull();
+  });
+});
 
 describe("variant picker logic", () => {
   it("offers only sizes that exist for the chosen type, in display order", () => {

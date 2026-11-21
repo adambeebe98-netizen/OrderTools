@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import type { PublicCatalogItem, PublicCategory, PublicProductGroup } from "@/lib/data/public";
 import { SupplyIcon, isSupplyIconName } from "@/components/icons/supply-icons";
-import { groupSummary, resolveSelection, type Attributes } from "@/lib/variants";
+import { groupSummary, optionIcons, resolveSelection, sharedIcon, variantIcon, type Attributes } from "@/lib/variants";
 import { cn, formatQty, plural, safeHttpUrl } from "@/lib/utils";
 import { ChangeNameDialog, NameGate, QuantityStepper, TechHeader, useLocalJson, useTechnicianName } from "./shared";
 
@@ -84,7 +84,7 @@ export function TechnicianApp({
   const popular = popularIds.map((id) => itemsById.get(id)).filter((i): i is PublicCatalogItem => !!i);
 
   const groupById = React.useMemo(() => new Map(groups.map((g) => [g.id, g])), [groups]);
-  const iconFor = (item: PublicCatalogItem) => (item.group_id ? groupById.get(item.group_id)?.icon : item.icon) ?? null;
+  const iconFor = (item: PublicCatalogItem) => (item.group_id ? variantIcon(groupById.get(item.group_id)?.icon, item.attributes) : item.icon) ?? null;
 
   // Each category lists product groups (one card per group) and standalone items, in display order.
   const sections = React.useMemo(() => {
@@ -197,7 +197,7 @@ export function TechnicianApp({
                   <CatalogRow
                     key={e.group.id}
                     item={e.variants[0]}
-                    icon={e.group.icon}
+                    icon={variantIcon(e.group.icon, e.variants[0].attributes)}
                     title={e.group.name}
                     subtitle={[...e.group.attribute_names.map((n) => e.variants[0].attributes[n]).filter(Boolean), e.variants[0].description]
                       .filter(Boolean)
@@ -377,7 +377,7 @@ function GroupRow({
         className={cn("flex w-full items-center gap-3 p-3 text-left hover:bg-muted/60 active:bg-muted", added > 0 && "bg-accent/40")}
         aria-label={`Choose ${group.name}`}
       >
-        <ProductIcon icon={group.icon} />
+        <ProductIcon icon={sharedIcon(group.icon, variants)} />
         <span className="min-w-0 flex-1">
           <span className="block font-medium leading-snug">{group.name}</span>
           <span className="block truncate text-sm text-muted-foreground">{summary || group.description}</span>
@@ -440,6 +440,8 @@ function VariantSheet({
   const variant = resolved?.variant ? (variants.find((v) => v.id === resolved.variant!.id) ?? null) : null;
   const inCart = variants.filter((v) => (cart[v.id] ?? 0) > 0);
   const remaining = resolved ? resolved.steps.filter((s) => !s.value).map((s) => s.name.toLowerCase()) : [];
+  // The header shows what's been narrowed down so far: pick Masonry and it becomes the masonry bit.
+  const possible = resolved ? variants.filter((v) => Object.entries(resolved.selection).every(([k, value]) => v.attributes[k] === value)) : [];
 
   return (
     <Dialog open={!!group} onOpenChange={(o) => !o && onClose()}>
@@ -448,7 +450,7 @@ function VariantSheet({
         {group && resolved && (
           <>
             <DialogHeader className="flex-row items-center gap-3">
-              <ProductIcon icon={group.icon} className="size-11" />
+              <ProductIcon icon={sharedIcon(group.icon, possible)} className="size-11" />
               <div className="min-w-0">
                 <DialogTitle>{group.name}</DialogTitle>
                 {group.description && <DialogDescription>{group.description}</DialogDescription>}
@@ -456,36 +458,41 @@ function VariantSheet({
             </DialogHeader>
             <DialogBody className="grid gap-5 pb-4">
               {/* Progressive: a step appears only once every earlier step has a value (picked or auto-picked). */}
-              {resolved.steps.filter((_, i) => resolved.steps.slice(0, i).every((prev) => prev.value)).map((step) => (
-                <fieldset key={step.name} className="grid gap-2">
-                  <legend className="mb-2 text-sm font-medium text-muted-foreground">{step.name}</legend>
-                  <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={step.name}>
-                    {step.options.map((option) => {
-                      const selected = step.value === option;
-                      const only = step.options.length === 1;
-                      return (
-                        <button
-                          key={option}
-                          type="button"
-                          role="radio"
-                          aria-checked={selected}
-                          disabled={only}
-                          onClick={() => setPicked((p) => ({ ...resolved.selection, ...p, [step.name]: option }))}
-                          className={cn(
-                            "h-12 min-w-16 rounded-xl border px-4 text-base font-medium transition-colors",
-                            selected
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "bg-card hover:border-input hover:bg-muted active:bg-muted",
-                            only && "disabled:opacity-100",
-                          )}
-                        >
-                          {option}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-              ))}
+              {resolved.steps.filter((_, i) => resolved.steps.slice(0, i).every((prev) => prev.value)).map((step) => {
+                const icons = optionIcons(group.icon, variants, group.attribute_names, resolved.selection, group.attribute_names.indexOf(step.name));
+                return (
+                  <fieldset key={step.name} className="grid gap-2">
+                    <legend className="mb-2 text-sm font-medium text-muted-foreground">{step.name}</legend>
+                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={step.name}>
+                      {step.options.map((option) => {
+                        const selected = step.value === option;
+                        const only = step.options.length === 1;
+                        const icon = icons?.[option];
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            role="radio"
+                            aria-checked={selected}
+                            disabled={only}
+                            onClick={() => setPicked((p) => ({ ...resolved.selection, ...p, [step.name]: option }))}
+                            className={cn(
+                              "inline-flex h-12 min-w-16 items-center justify-center gap-2 rounded-xl border px-4 text-base font-medium transition-colors",
+                              selected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "bg-card hover:border-input hover:bg-muted active:bg-muted",
+                              only && "disabled:opacity-100",
+                            )}
+                          >
+                            {isSupplyIconName(icon) && <SupplyIcon name={icon} className="-ml-1 size-6 shrink-0" />}
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                );
+              })}
 
               <div className="grid gap-2">
                 <span className="text-sm font-medium text-muted-foreground">Quantity</span>
