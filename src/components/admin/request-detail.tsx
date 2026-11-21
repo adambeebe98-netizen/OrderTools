@@ -218,7 +218,7 @@ function ItemRow({
         <div className="flex flex-wrap items-center gap-2">
           {item.is_custom && !ordered ? (
             <input
-              className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-medium hover:border-input focus:border-ring focus:outline-none"
+              className="-ml-1 min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-medium hover:border-input focus:border-ring focus:outline-none"
               value={name}
               maxLength={120}
               aria-label="Item name"

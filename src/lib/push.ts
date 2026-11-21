@@ -30,6 +30,18 @@ export async function notifyTeamManagers(teamId: string, payload: PushPayload) {
     const userIds = (members ?? []).map((m) => m.user_id);
     if (userIds.length === 0) return { sent: 0 };
 
+    return await sendToUsers(userIds, payload);
+  } catch (err) {
+    console.error("notifyTeamManagers failed", err);
+    return { sent: 0 };
+  }
+}
+
+export async function sendToUsers(userIds: string[], payload: PushPayload) {
+  if (!pushConfigured() || userIds.length === 0) return { sent: 0 };
+  try {
+    configure();
+    const supabase = createServiceClient();
     const { data: subs } = await supabase
       .from("push_subscriptions")
       .select("id, endpoint, p256dh, auth")
@@ -57,7 +69,7 @@ export async function notifyTeamManagers(teamId: string, payload: PushPayload) {
     if (dead.length) await supabase.from("push_subscriptions").delete().in("id", dead);
     return { sent };
   } catch (err) {
-    console.error("notifyTeamManagers failed", err);
+    console.error("sendToUsers failed", err);
     return { sent: 0 };
   }
 }

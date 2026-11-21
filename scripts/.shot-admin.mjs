@@ -1,0 +1,41 @@
+import { chromium, devices } from "playwright";
+const b = await chromium.launch();
+const errs = [];
+async function run(ctxOpts, prefix) {
+  const ctx = await b.newContext(ctxOpts);
+  const p = await ctx.newPage();
+  p.on("pageerror", e => errs.push(prefix + " PAGEERROR " + e.message));
+  p.on("console", m => m.type() === "error" && errs.push(prefix + " CONSOLE " + m.text()));
+  await p.goto("http://localhost:3000/admin");
+  await p.fill("#email", "manager@example.com");
+  await p.fill("#password", "password123");
+  await p.click("button[type=submit]");
+  await p.waitForURL(/\/admin\/[0-9a-f-]{36}$/);
+  await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-dash.png`, fullPage: true });
+  const base = p.url();
+  await p.goto(base + "/requests"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-requests.png`, fullPage: true });
+  await p.goto(base + "/shopping-list"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-shop.png`, fullPage: true });
+  await p.goto(base + "/shopping-list?view=technician"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-shop-tech.png`, fullPage: true });
+  await p.goto(base + "/catalog"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-catalog.png` });
+  await p.goto(base + "/catalog?tab=custom"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-custom.png` });
+  await p.goto(base + "/settings"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-settings.png`, fullPage: true });
+  await p.goto(base + "/technicians"); await p.waitForLoadState("networkidle");
+  await p.goto("http://localhost:3000/admin/super"); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-super.png`, fullPage: true });
+  // open a request detail
+  await p.goto(base + "/requests"); await p.waitForLoadState("networkidle");
+  await p.locator("ul li a").first().click(); await p.waitForURL(/requests\/[0-9a-f-]{36}/); await p.waitForLoadState("networkidle");
+  await p.screenshot({ path: `/tmp/claude-0/shots/${prefix}-detail.png`, fullPage: true });
+  await ctx.close();
+}
+await run({ viewport: { width: 1360, height: 900 } }, "d");
+await run({ ...devices["Pixel 7"] }, "m");
+console.log(errs.join("\n") || "no errors");
+await b.close();

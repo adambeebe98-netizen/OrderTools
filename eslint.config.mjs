@@ -18,7 +18,16 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "src/lib/database.types.ts",
+      "public/sw.js",
     ],
+  },
+  {
+    rules: {
+      // Catalog images are arbitrary user-supplied URLs; plain <img> avoids
+      // configuring remote image domains for next/image.
+      "@next/next/no-img-element": "off",
+    },
   },
 ];
 
