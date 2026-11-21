@@ -69,16 +69,30 @@ export async function getPublicCatalog(teamId: string) {
       .order("name"),
   ]);
   if (cats.error) throw cats.error;
-  if (items.error) throw items.error;
-  if (groups.error) throw groups.error;
+  // Until the product-groups migration has run, fall back to the flat catalog.
+  let itemRows = items.data as PublicCatalogItem[] | null;
+  if (items.error) {
+    if (!isMissingSchema(items.error)) throw items.error;
+    const legacy = await supabase
+      .from("catalog_items")
+      .select("id, name, description, image_url, unit, category_id, grainger_sku, sort_order")
+      .eq("team_id", teamId)
+      .is("archived_at", null)
+      .order("sort_order")
+      .order("name");
+    if (legacy.error) throw legacy.error;
+    itemRows = legacy.data.map((i) => ({ ...i, group_id: null, attributes: {}, icon: null }));
+  }
+  if (groups.error && !isMissingSchema(groups.error)) throw groups.error;
+  const groupRows = groups.error ? [] : groups.data;
   const categoryIds = new Set(cats.data.map((c) => c.id));
   const visibleCategory = (id: string | null) => (id && categoryIds.has(id) ? id : null);
-  const groupById = new Map(groups.data.map((g) => [g.id, g]));
+  const groupById = new Map(groupRows.map((g) => [g.id, g]));
   return {
     categories: cats.data as PublicCategory[],
-    groups: groups.data.map((g) => ({ ...g, category_id: visibleCategory(g.category_id) })) as PublicProductGroup[],
+    groups: groupRows.map((g) => ({ ...g, category_id: visibleCategory(g.category_id) })) as PublicProductGroup[],
     // Variants of archived groups are hidden; a variant shows in its group's category.
-    items: (items.data as PublicCatalogItem[])
+    items: (itemRows ?? [])
       .filter((i) => !i.group_id || groupById.has(i.group_id))
       .map((i) => ({
         ...i,
@@ -126,4 +140,9 @@ export async function getPopularItemIds(teamId: string, limit = 5): Promise<stri
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([id]) => id);
+}
+
+/** True when an error means the product-groups migration hasn't been applied yet. */
+export function isMissingSchema(error: { code?: string } | null): boolean {
+  return !!error && ["42P01", "42703", "PGRST200", "PGRST204", "PGRST205"].includes(error.code ?? "");
 }

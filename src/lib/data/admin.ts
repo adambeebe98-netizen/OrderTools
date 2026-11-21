@@ -249,10 +249,21 @@ export async function getCatalog(db: DB, teamId: string) {
     // Which items have ever been requested (those can be archived but not deleted).
     db.from("request_items").select("catalog_item_id").eq("team_id", teamId).not("catalog_item_id", "is", null).limit(10000),
   ]);
+  // Until the product-groups migration has run, read the flat catalog.
+  let itemRows = items.data;
+  if (items.error) {
+    const legacy = await db
+      .from("catalog_items")
+      .select("id, name, description, image_url, unit, grainger_sku, grainger_url, category_id, sort_order, archived_at, updated_at")
+      .eq("team_id", teamId)
+      .order("sort_order")
+      .order("name");
+    itemRows = (legacy.data ?? []).map((i) => ({ ...i, group_id: null, attributes: {}, icon: null }));
+  }
   return {
     categories: cats.data ?? [],
-    items: (items.data ?? []).map((i) => ({ ...i, attributes: (i.attributes ?? {}) as Record<string, string> })),
-    groups: groups.data ?? [],
+    items: (itemRows ?? []).map((i) => ({ ...i, attributes: (i.attributes ?? {}) as Record<string, string> })),
+    groups: groups.error ? [] : (groups.data ?? []),
     requestedIds: [...new Set((requested.data ?? []).map((r) => r.catalog_item_id as string))],
   };
 }
