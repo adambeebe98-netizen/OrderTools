@@ -26,17 +26,34 @@ test("technician request to Grainger order, with variants and partial fulfillmen
   await page.getByRole("button", { name: "Choose Long Bit" }).click();
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByRole("button", { name: /Choose type and size/ })).toBeDisabled();
+  await expect(sheet.getByRole("radio")).toHaveCount(2); // only Type until a type is chosen
   await sheet.getByRole("radio", { name: "Masonry" }).click();
   await expect(sheet.getByRole("radio")).toHaveCount(5); // Wood, Masonry + 3 masonry sizes
   await sheet.getByRole("radio", { name: '3/8"' }).click();
   await sheet.getByRole("button", { name: /Increase Long Bit/ }).click();
   await sheet.getByRole("button", { name: "Add to request" }).click();
+  // Sheet stays open for adding more; Type is kept, Size is cleared for the next pick.
+  await expect(sheet.getByRole("status")).toContainText('Added Long Bit — Masonry — 3/8" × 2');
+  await expect(sheet.getByRole("radio", { name: "Masonry" })).toHaveAttribute("aria-checked", "true");
+  await sheet.getByRole("radio", { name: '1/2"' }).click();
+  await sheet.getByRole("button", { name: "Add to request" }).click();
+  await expect(sheet.getByText("Already in your request")).toBeVisible();
+  await expect(sheet.getByRole("button", { name: 'Remove Long Bit — Masonry — 1/2"' })).toBeVisible();
+  await sheet.getByRole("button", { name: 'Remove Long Bit — Masonry — 1/2"' }).click();
+  await sheet.getByRole("button", { name: "Close" }).click(); // the X
   await expect(page.getByText("1 added")).toBeVisible();
 
   // Single-option groups come pre-selected.
   await page.getByRole("button", { name: "Choose Short Bit" }).click();
   await sheet.getByRole("radio", { name: "Masonry" }).click();
   await expect(sheet.getByRole("radio", { name: '1/4"' })).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("Escape");
+
+  // Extra-Long Bit → Flex (3 ft) has no size: it's ready to add right away.
+  await page.getByRole("button", { name: "Choose Extra-Long Bit" }).click();
+  await sheet.getByRole("radio", { name: "Flex (3 ft)" }).click();
+  await expect(sheet.getByRole("radio")).toHaveCount(2);
+  await expect(sheet.getByRole("button", { name: "Add to request" })).toBeEnabled();
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Categories" }).click();

@@ -69,6 +69,7 @@ GROUPS = [
         "variants": [
             ({"Type": "Masonry", "Size": '3/8"'}, ['Extra-Long Masonry Bit 3/8"'], "each", "Extra-long carbide bit for thick walls"),
             ({"Type": "Masonry", "Size": '1/2"'}, ['Extra-Long Masonry Bit 1/2"'], "each", "Extra-long carbide bit for thick walls"),
+            ({"Type": "Flex (3 ft)"}, ["3 Foot Flex Bit", "3' Flex Bit"], "each", "3-foot flexible installer bit"),
         ],
     },
     {

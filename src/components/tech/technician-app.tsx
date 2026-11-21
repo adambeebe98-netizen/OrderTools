@@ -324,8 +324,6 @@ export function TechnicianApp({
         onClose={() => setOpenGroup(null)}
         onAdd={(variant, qty) => {
           setQty(variant.id, (cart.items[variant.id] ?? 0) + qty);
-          toast.success(`Added ${variant.name} × ${qty}`);
-          setOpenGroup(null);
         }}
         onRemove={(variant) => setQty(variant.id, 0)}
       />
@@ -399,10 +397,32 @@ function VariantSheet({
 }) {
   const [picked, setPicked] = React.useState<Attributes>({});
   const [qty, setQty] = React.useState(1);
+  const [justAdded, setJustAdded] = React.useState<string | null>(null);
   React.useEffect(() => {
     setPicked({});
     setQty(1);
+    setJustAdded(null);
   }, [group?.id]);
+  React.useEffect(() => {
+    if (!justAdded) return;
+    const t = setTimeout(() => setJustAdded(null), 2500);
+    return () => clearTimeout(t);
+  }, [justAdded]);
+
+  const add = (v: PublicCatalogItem) => {
+    onAdd(v, qty);
+    setJustAdded(`${v.name} × ${qty}`);
+    setQty(1);
+    // Keep earlier choices (e.g. Masonry) and clear the last one (Size) so the next pick is one tap.
+    if (group && group.attribute_names.length > 0) {
+      const last = group.attribute_names[group.attribute_names.length - 1];
+      setPicked((p) => {
+        const next = { ...(resolveSelection(variants, group.attribute_names, p).selection) };
+        delete next[last];
+        return next;
+      });
+    }
+  };
 
   const resolved = group ? resolveSelection(variants, group.attribute_names, picked) : null;
   const variant = resolved?.variant ? (variants.find((v) => v.id === resolved.variant!.id) ?? null) : null;
@@ -423,7 +443,8 @@ function VariantSheet({
               </div>
             </DialogHeader>
             <DialogBody className="grid gap-5 pb-4">
-              {resolved.steps.map((step) => (
+              {/* Progressive: a step appears only once every earlier step has a value (picked or auto-picked). */}
+              {resolved.steps.filter((_, i) => resolved.steps.slice(0, i).every((prev) => prev.value)).map((step) => (
                 <fieldset key={step.name} className="grid gap-2">
                   <legend className="mb-2 text-sm font-medium text-muted-foreground">{step.name}</legend>
                   <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={step.name}>
@@ -462,6 +483,13 @@ function VariantSheet({
                 </div>
               </div>
 
+              {justAdded && (
+                <p className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-soft px-3 py-2 text-sm" role="status">
+                  <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden />
+                  Added {justAdded}
+                </p>
+              )}
+
               {inCart.length > 0 && (
                 <div className="grid gap-1.5 rounded-xl border bg-muted/40 p-3 text-sm">
                   <span className="text-xs font-medium text-muted-foreground">Already in your request</span>
@@ -479,7 +507,7 @@ function VariantSheet({
               )}
             </DialogBody>
             <DialogFooter>
-              <Button size="xl" className="w-full sm:h-12" disabled={!variant} onClick={() => variant && onAdd(variant, qty)}>
+              <Button size="xl" className="w-full sm:h-12" disabled={!variant} onClick={() => variant && add(variant)}>
                 <Plus className="size-5" />
                 {variant ? `Add to request` : `Choose ${remaining.join(" and ")}`}
               </Button>
