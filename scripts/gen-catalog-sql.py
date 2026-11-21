@@ -5,10 +5,11 @@ reorganize_sql(slug) is also imported by gen-seed.py for local data.
 """
 import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from catalog_def import CATEGORIES, GROUPS, OBSOLETE, STANDALONE, FLAT_CATALOG, variant_name
+from catalog_def import CATEGORIES, GROUPS, OBSOLETE, STANDALONE, FLAT_CATALOG, NEW_ITEMS, variant_name
 
 def definition():
     flat = {n: (u, d) for n, _, u, d in FLAT_CATALOG}
+    flat.update(NEW_ITEMS)
     return {
         "categories": CATEGORIES,
         "groups": [

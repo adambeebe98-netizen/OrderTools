@@ -49,12 +49,12 @@ test("technician request to Grainger order, with variants and partial fulfillmen
   await expect(sheet.getByRole("radio", { name: '1/4"' })).toHaveAttribute("aria-checked", "true");
   await page.keyboard.press("Escape");
 
-  // Extra-Long Bit → Flex (3 ft) has no size: it's ready to add right away.
-  await page.getByRole("button", { name: "Choose Extra-Long Bit" }).click();
-  await sheet.getByRole("radio", { name: "Flex (3 ft)" }).click();
-  await expect(sheet.getByRole("radio")).toHaveCount(2);
-  await expect(sheet.getByRole("button", { name: "Add to request" })).toBeEnabled();
-  await page.keyboard.press("Escape");
+  // Products with a single option (Hole Saw, Speedbor, 3 ft Flex Bit) get a plain + button.
+  await expect(page.getByRole("button", { name: "Choose Hole Saw" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Add Hole Saw" }).click();
+  await expect(page.getByRole("button", { name: "Increase Hole Saw" })).toBeVisible();
+  await page.getByRole("button", { name: "Remove Hole Saw" }).click(); // back to 0 → removed
+  await expect(page.getByRole("button", { name: "Add 3 ft Flex Bit" })).toBeVisible();
 
   await page.getByRole("button", { name: "Categories" }).click();
   await page.getByRole("button", { name: /Wiring & Connectors/ }).click();

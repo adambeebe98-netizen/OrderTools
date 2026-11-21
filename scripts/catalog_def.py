@@ -69,7 +69,6 @@ GROUPS = [
         "variants": [
             ({"Type": "Masonry", "Size": '3/8"'}, ['Extra-Long Masonry Bit 3/8"'], "each", "Extra-long carbide bit for thick walls"),
             ({"Type": "Masonry", "Size": '1/2"'}, ['Extra-Long Masonry Bit 1/2"'], "each", "Extra-long carbide bit for thick walls"),
-            ({"Type": "Flex (3 ft)"}, ["3 Foot Flex Bit", "3' Flex Bit"], "each", "3-foot flexible installer bit"),
         ],
     },
     {
@@ -89,6 +88,7 @@ OBSOLETE = ['Short Wood Bit 1/4"']
 
 # Standalone (no variants) items: name -> icon. Order = display order within the category.
 STANDALONE = [
+    ("3 ft Flex Bit", "Drill Bits", "drill-bit"),
     ("RJ45 Connectors", "Wiring & Connectors", "rj45"),
     ("Dolphin Beans", "Wiring & Connectors", "gel-connector"),
     ("Wire Nuts", "Wiring & Connectors", "wire-nut"),
@@ -104,6 +104,10 @@ STANDALONE = [
     ("3-Way Plug Splitter", "Power", "splitter"),
     ("Power Strip", "Power", "power-strip"),
 ]
+
+
+# Standalone items that weren't in the original import: name -> (unit, description)
+NEW_ITEMS = {"3 ft Flex Bit": ("each", "3-foot flexible installer bit")}
 
 
 def variant_name(group_name, attribute_names, attrs):

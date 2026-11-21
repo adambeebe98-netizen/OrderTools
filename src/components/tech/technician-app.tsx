@@ -193,7 +193,19 @@ export function TechnicianApp({
             </h1>
             <ul className="mb-6 divide-y overflow-hidden rounded-2xl border bg-card">
               {current.entries.map((e) =>
-                e.kind === "group" ? (
+                e.kind === "group" && e.variants.length === 1 ? (
+                  <CatalogRow
+                    key={e.group.id}
+                    item={e.variants[0]}
+                    icon={e.group.icon}
+                    title={e.group.name}
+                    subtitle={[...e.group.attribute_names.map((n) => e.variants[0].attributes[n]).filter(Boolean), e.variants[0].description]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    qty={cart.items[e.variants[0].id] ?? 0}
+                    onQty={(q) => setQty(e.variants[0].id, q)}
+                  />
+                ) : e.kind === "group" ? (
                   <GroupRow
                     key={e.group.id}
                     group={e.group}
@@ -549,33 +561,43 @@ function ItemThumb({ item, icon }: { item: Pick<PublicCatalogItem, "image_url" |
 function CatalogRow({
   item,
   icon,
+  title,
+  subtitle,
   qty,
   onQty,
 }: {
   item: PublicCatalogItem;
   icon?: string | null;
+  /** Display overrides (e.g. a one-option product group shows its group name). */
+  title?: string;
+  subtitle?: string;
   qty: number;
   onQty: (q: number) => void;
 }) {
+  const name = title ?? item.name;
   return (
     <li className={cn("flex items-center gap-3 p-3", qty > 0 && "bg-accent/40")}>
       <ItemThumb item={item} icon={icon} />
       <div className="min-w-0 flex-1">
-        <p className="font-medium leading-snug">{item.name}</p>
-        {(item.description || (item.unit && item.unit !== "each")) && (
-          <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-            {item.unit && item.unit !== "each" && <span className="font-medium">Per {item.unit}. </span>}
-            {item.description}
-          </p>
+        <p className="font-medium leading-snug">{name}</p>
+        {subtitle !== undefined ? (
+          subtitle && <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{subtitle}</p>
+        ) : (
+          (item.description || (item.unit && item.unit !== "each")) && (
+            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+              {item.unit && item.unit !== "each" && <span className="font-medium">Per {item.unit}. </span>}
+              {item.description}
+            </p>
+          )
         )}
       </div>
       {qty > 0 ? (
-        <QuantityStepper value={qty} onChange={onQty} label={item.name} />
+        <QuantityStepper value={qty} onChange={onQty} label={name} />
       ) : (
         <button
           type="button"
           onClick={() => onQty(1)}
-          aria-label={`Add ${item.name}`}
+          aria-label={`Add ${name}`}
           className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-primary/15 text-primary hover:bg-primary/25 active:scale-95"
         >
           <Plus className="size-5" />
