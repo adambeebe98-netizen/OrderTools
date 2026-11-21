@@ -77,3 +77,24 @@ export type PublicHistoryRequest = {
 };
 
 export { HISTORY_DAYS } from "@/lib/history-constants";
+
+/** Catalog items requested most often in the last 90 days (by number of requests). */
+export async function getPopularItemIds(teamId: string, limit = 5): Promise<string[]> {
+  const supabase = createServiceClient();
+  const since = new Date(Date.now() - 90 * 86400_000).toISOString();
+  const { data, error } = await supabase
+    .from("request_items")
+    .select("catalog_item_id")
+    .eq("team_id", teamId)
+    .is("removed_at", null)
+    .not("catalog_item_id", "is", null)
+    .gte("created_at", since)
+    .limit(5000);
+  if (error || !data) return [];
+  const counts = new Map<string, number>();
+  for (const r of data) if (r.catalog_item_id) counts.set(r.catalog_item_id, (counts.get(r.catalog_item_id) ?? 0) + 1);
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([id]) => id);
+}

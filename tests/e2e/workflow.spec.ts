@@ -22,11 +22,16 @@ test("technician request to Grainger order, with partial fulfillment", async ({ 
   await page.goto(`/r/${SLUG}`);
   await page.fill("#tech-name", tech);
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("searchbox", { name: "Search supplies" }).fill("toggle");
+  // Browse by category: open one, add items with +, go back, open another.
+  await page.getByRole("button", { name: /Anchors & Fasteners/ }).click();
   await page.getByRole("button", { name: /^Add Toggle Bolts/ }).click();
   await page.getByRole("button", { name: /^Increase Toggle Bolts/ }).click();
-  await page.getByRole("searchbox", { name: "Search supplies" }).fill("");
+  await page.getByRole("button", { name: "Categories" }).click();
+  await expect(page.getByText("1 added")).toBeVisible();
+  await page.getByRole("button", { name: /Safety & Cleanup/ }).click();
   await page.getByRole("button", { name: /^Add Shoe Covers/ }).click();
+  await page.goBack(); // phone back button returns to categories, cart kept
+  await expect(page.getByText("Most ordered")).toBeVisible();
   await page.getByRole("button", { name: "Review request" }).click();
   await expect(page.getByRole("dialog")).toContainText(tech);
   await page.getByRole("button", { name: "Submit request" }).click();

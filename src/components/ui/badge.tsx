@@ -8,8 +8,8 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: "border-transparent bg-muted text-foreground",
-        requested: "border-warning/30 bg-warning-soft text-[oklch(0.45_0.12_60)]",
-        ordered: "border-success/30 bg-success-soft text-[oklch(0.4_0.11_155)]",
+        requested: "border-warning/30 bg-warning-soft text-warning",
+        ordered: "border-success/30 bg-success-soft text-[oklch(0.82_0.12_155)]",
         primary: "border-transparent bg-primary text-primary-foreground",
         outline: "border-border text-muted-foreground",
         custom: "border-accent-foreground/20 bg-accent text-accent-foreground",

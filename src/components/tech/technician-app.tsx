@@ -2,7 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Package, PackagePlus, Search, Trash2, X } from "lucide-react";
+import {
+  Cable,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Drill,
+  Flame,
+  Hammer,
+  Package,
+  PackagePlus,
+  PlugZap,
+  Plus,
+  Trash2,
+  type LucideIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -28,31 +42,70 @@ const EMPTY_CART: Cart = { items: {}, custom: [], note: "" };
 
 type SubmittedSummary = { id: string; lines: { name: string; quantity: number; unit: string | null }[] };
 
+const UNCATEGORIZED = "uncategorized";
+
+/** Pick a category icon from its name, so admins don't have to choose one. */
+function categoryIcon(name: string): { icon: LucideIcon; tint: string } {
+  const n = name.toLowerCase();
+  if (/drill|bit|saw|bore/.test(n)) return { icon: Drill, tint: "bg-sky-500/15 text-sky-300" };
+  if (/wir|connect|cable|rj45|low.?volt|network/.test(n)) return { icon: Cable, tint: "bg-violet-500/15 text-violet-300" };
+  if (/power|plug|outlet|electric/.test(n)) return { icon: PlugZap, tint: "bg-amber-500/15 text-amber-300" };
+  if (/mount|fasten|screw|anchor|hardware|seal|tape|adhes/.test(n)) return { icon: Hammer, tint: "bg-emerald-500/15 text-emerald-300" };
+  return { icon: Package, tint: "bg-slate-500/20 text-slate-300" };
+}
+
 export function TechnicianApp({
   slug,
   teamName,
   categories,
   items,
+  popularIds,
 }: {
   slug: string;
   teamName: string;
   categories: PublicCategory[];
   items: PublicCatalogItem[];
+  popularIds: string[];
 }) {
   const [name, setName] = useTechnicianName();
   const [cart, setCart] = useLocalJson<Cart>(`supply-portal:cart:${slug}`, EMPTY_CART);
-  const [query, setQuery] = React.useState("");
-  const [category, setCategory] = React.useState<string | "all">("all");
+  const [openCategory, setOpenCategory] = React.useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [otherOpen, setOtherOpen] = React.useState(false);
   const [nameOpen, setNameOpen] = React.useState(false);
   const [submitted, setSubmitted] = React.useState<SubmittedSummary | null>(null);
 
   const itemsById = React.useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+  const popular = popularIds.map((id) => itemsById.get(id)).filter((i): i is PublicCatalogItem => !!i);
+
+  const groups = React.useMemo(() => {
+    const all = [...categories, { id: UNCATEGORIZED, name: "Other supplies" }];
+    return all
+      .map((c) => ({ ...c, items: items.filter((i) => (i.category_id ?? UNCATEGORIZED) === c.id) }))
+      .filter((g) => g.items.length > 0);
+  }, [categories, items]);
+  const current = groups.find((g) => g.id === openCategory) ?? null;
+
+  // Phone back button closes a category instead of leaving the page.
+  React.useEffect(() => {
+    const onPop = (e: PopStateEvent) => setOpenCategory((e.state as { category?: string } | null)?.category ?? null);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const showCategory = (id: string) => {
+    window.history.pushState({ category: id }, "");
+    setOpenCategory(id);
+    window.scrollTo({ top: 0 });
+  };
+  const backToCategories = () => {
+    if ((window.history.state as { category?: string } | null)?.category) window.history.back();
+    else setOpenCategory(null);
+  };
 
   // Drop cart entries for items that were archived since the cart was saved.
   const cartItems = Object.entries(cart.items).filter(([id, qty]) => itemsById.has(id) && qty > 0);
   const lineCount = cartItems.length + cart.custom.length;
+  const addedIn = (g: { items: PublicCatalogItem[] }) => g.items.filter((i) => (cart.items[i.id] ?? 0) > 0).length;
 
   const setQty = (id: string, qty: number) =>
     setCart((c) => {
@@ -61,25 +114,6 @@ export function TechnicianApp({
       else next[id] = qty;
       return { ...c, items: next };
     });
-
-  const filtered = React.useMemo(() => {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return items.filter((i) => {
-      if (category !== "all" && !terms.length && (i.category_id ?? "uncategorized") !== category) return false;
-      if (!terms.length) return true;
-      const hay = `${i.name} ${i.description ?? ""} ${i.grainger_sku ?? ""}`.toLowerCase();
-      return terms.every((t) => hay.includes(t));
-    });
-  }, [items, query, category]);
-
-  const grouped = React.useMemo(() => {
-    const order = [...categories, { id: "uncategorized", name: "Other supplies" }];
-    return order
-      .map((c) => ({ ...c, items: filtered.filter((i) => (i.category_id ?? "uncategorized") === c.id) }))
-      .filter((g) => g.items.length > 0);
-  }, [categories, filtered]);
-
-  const hasUncategorized = items.some((i) => !i.category_id);
 
   if (name === undefined) return <div className="min-h-dvh" aria-busy />;
   if (!name) return <NameGate teamName={teamName} onSave={setName} />;
@@ -101,101 +135,103 @@ export function TechnicianApp({
     );
   }
 
+  const otherItemCard = (
+    <button
+      type="button"
+      onClick={() => setOtherOpen(true)}
+      className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-dashed bg-card p-4 text-left hover:bg-muted"
+    >
+      <span className="rounded-xl bg-accent p-2.5 text-accent-foreground">
+        <PackagePlus className="size-5" aria-hidden />
+      </span>
+      <span className="flex-1">
+        <span className="block font-medium">Request another item</span>
+        <span className="block text-sm text-muted-foreground">Not in the list? Describe what you need.</span>
+      </span>
+      <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+    </button>
+  );
+
   return (
     <div className="min-h-dvh pb-28">
       <TechHeader slug={slug} teamName={teamName} name={name} onChangeName={() => setNameOpen(true)} active="catalog" />
 
-      <div className="sticky top-14 z-20 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-2xl px-4 pt-3 pb-2">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <Input
-              type="search"
-              inputMode="search"
-              enterKeyHint="search"
-              placeholder="Search supplies…"
-              aria-label="Search supplies"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-12 rounded-xl pl-11 pr-11 text-base"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-muted-foreground hover:bg-muted"
-                aria-label="Clear search"
-              >
-                <X className="size-4" />
-              </button>
-            )}
-          </div>
-          {!query && categories.length > 0 && (
-            <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Categories">
-              {[{ id: "all", name: "All" }, ...categories, ...(hasUncategorized ? [{ id: "uncategorized", name: "Other" }] : [])].map(
-                (c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={category === c.id}
-                    onClick={() => setCategory(c.id)}
-                    className={cn(
-                      "h-9 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors",
-                      category === c.id ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted",
-                    )}
-                  >
-                    {c.name}
-                  </button>
-                ),
-              )}
+      {current ? (
+        <>
+          <div className="sticky top-14 z-20 border-b bg-background/95 backdrop-blur">
+            <div className="mx-auto flex h-14 max-w-2xl items-center gap-2 px-2">
+              <Button variant="ghost" size="lg" className="px-3" onClick={backToCategories}>
+                <ChevronLeft className="size-5" /> Categories
+              </Button>
             </div>
-          )}
-        </div>
-      </div>
-
-      <main className="mx-auto max-w-2xl px-4 pt-4">
-        {items.length === 0 && (
-          <p className="mb-4 rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-            Your manager hasn&apos;t added catalog items yet. Use &ldquo;Request another item&rdquo; below.
-          </p>
-        )}
-
-        {grouped.map((g) => (
-          <section key={g.id} className="mb-6" aria-labelledby={`cat-${g.id}`}>
-            <h2 id={`cat-${g.id}`} className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {g.name}
-            </h2>
-            <ul className="divide-y overflow-hidden rounded-xl border bg-card">
-              {g.items.map((item) => (
+          </div>
+          <main className="mx-auto max-w-2xl px-4 pt-4">
+            <h1 className="mb-3 flex items-center gap-3 text-xl font-semibold tracking-tight">
+              <CategoryIcon name={current.name} />
+              {current.name}
+            </h1>
+            <ul className="mb-6 divide-y overflow-hidden rounded-2xl border bg-card">
+              {current.items.map((item) => (
                 <CatalogRow key={item.id} item={item} qty={cart.items[item.id] ?? 0} onQty={(q) => setQty(item.id, q)} />
               ))}
             </ul>
-          </section>
-        ))}
+            {otherItemCard}
+          </main>
+        </>
+      ) : (
+        <main className="mx-auto max-w-2xl px-4 pt-5">
+          {popular.length > 0 && (
+            <section className="mb-7" aria-labelledby="popular-heading">
+              <h2 id="popular-heading" className="mb-2 flex items-center gap-1.5 px-1 text-sm font-semibold text-muted-foreground">
+                <Flame className="size-4 text-amber-400" aria-hidden /> Most ordered
+              </h2>
+              <ul className="divide-y overflow-hidden rounded-2xl border bg-card">
+                {popular.map((item) => (
+                  <CatalogRow key={item.id} item={item} qty={cart.items[item.id] ?? 0} onQty={(q) => setQty(item.id, q)} />
+                ))}
+              </ul>
+            </section>
+          )}
 
-        {query && filtered.length === 0 && (
-          <div className="mb-6 rounded-xl border border-dashed p-6 text-center">
-            <p className="font-medium">No matches for &ldquo;{query}&rdquo;</p>
-            <p className="mt-1 text-sm text-muted-foreground">You can still request it as another item.</p>
-          </div>
-        )}
+          {groups.length > 0 ? (
+            <section className="mb-6" aria-labelledby="categories-heading">
+              <h2 id="categories-heading" className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
+                Categories
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                {groups.map((g) => {
+                  const added = addedIn(g);
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => showCategory(g.id)}
+                      className="relative flex min-h-32 flex-col justify-between gap-3 rounded-2xl border bg-card p-4 text-left transition-colors hover:border-input hover:bg-muted active:scale-[0.98]"
+                    >
+                      <CategoryIcon name={g.name} size="lg" />
+                      <span>
+                        <span className="block font-semibold leading-snug">{g.name}</span>
+                        <span className="text-sm text-muted-foreground">{plural(g.items.length, "item")}</span>
+                      </span>
+                      {added > 0 && (
+                        <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                          {added} added
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ) : (
+            <p className="mb-6 rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Your manager hasn&apos;t added catalog items yet. Use &ldquo;Request another item&rdquo; below.
+            </p>
+          )}
 
-        <button
-          type="button"
-          onClick={() => setOtherOpen(true)}
-          className="mb-6 flex w-full items-center gap-3 rounded-xl border border-dashed bg-card p-4 text-left hover:bg-muted"
-        >
-          <span className="rounded-lg bg-accent p-2.5 text-accent-foreground">
-            <PackagePlus className="size-5" aria-hidden />
-          </span>
-          <span className="flex-1">
-            <span className="block font-medium">Request another item</span>
-            <span className="block text-sm text-muted-foreground">Can&apos;t find it? Describe what you need.</span>
-          </span>
-          <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
-        </button>
-      </main>
+          {otherItemCard}
+        </main>
+      )}
 
       {lineCount > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-card/95 px-4 pt-3 pb-safe backdrop-blur">
@@ -214,7 +250,7 @@ export function TechnicianApp({
       <OtherItemDialog
         open={otherOpen}
         onOpenChange={setOtherOpen}
-        initialName={query}
+        initialName=""
         onAdd={(line) => {
           setCart((c) => ({ ...c, custom: [...c.custom, line] }));
           toast.success(`Added “${line.name}”`);
@@ -232,7 +268,7 @@ export function TechnicianApp({
         onSubmitted={(summary) => {
           setCart(EMPTY_CART);
           setReviewOpen(false);
-          setQuery("");
+          setOpenCategory(null);
           setSubmitted(summary);
           window.scrollTo({ top: 0 });
         }}
@@ -240,6 +276,15 @@ export function TechnicianApp({
 
       <ChangeNameDialog open={nameOpen} onOpenChange={setNameOpen} name={name} onSave={setName} />
     </div>
+  );
+}
+
+function CategoryIcon({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
+  const { icon: Icon, tint } = categoryIcon(name);
+  return (
+    <span className={cn("flex shrink-0 items-center justify-center rounded-xl", tint, size === "lg" ? "size-12" : "size-9")} aria-hidden>
+      <Icon className={size === "lg" ? "size-6" : "size-5"} />
+    </span>
   );
 }
 
@@ -257,11 +302,8 @@ function ItemThumb({ item }: { item: Pick<PublicCatalogItem, "image_url" | "name
       />
     );
   }
-  return (
-    <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground" aria-hidden>
-      <Package className="size-5" />
-    </span>
-  );
+  // No photo: skip the placeholder so the list stays clean.
+  return null;
 }
 
 function CatalogRow({ item, qty, onQty }: { item: PublicCatalogItem; qty: number; onQty: (q: number) => void }) {
@@ -280,9 +322,14 @@ function CatalogRow({ item, qty, onQty }: { item: PublicCatalogItem; qty: number
       {qty > 0 ? (
         <QuantityStepper value={qty} onChange={onQty} label={item.name} />
       ) : (
-        <Button variant="outline" size="lg" className="h-11 shrink-0 rounded-xl px-5" onClick={() => onQty(1)} aria-label={`Add ${item.name}`}>
-          Add
-        </Button>
+        <button
+          type="button"
+          onClick={() => onQty(1)}
+          aria-label={`Add ${item.name}`}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-primary/15 text-primary hover:bg-primary/25 active:scale-95"
+        >
+          <Plus className="size-5" />
+        </button>
       )}
     </li>
   );
