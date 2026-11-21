@@ -45,8 +45,13 @@ export const requireTeam = cache(async (teamId: string) => {
 export async function listMyTeams() {
   const { supabase, user, profile } = await requireUser();
   if (profile.is_super_admin) {
-    const { data } = await supabase.from("teams").select("id, name, slug").order("name");
-    return data ?? [];
+    // Super admins see every team; the ones they manage come first.
+    const [{ data: all }, { data: mine }] = await Promise.all([
+      supabase.from("teams").select("id, name, slug").order("name"),
+      supabase.from("team_members").select("team_id").eq("user_id", user.id),
+    ]);
+    const own = new Set((mine ?? []).map((m) => m.team_id));
+    return (all ?? []).sort((a, b) => Number(own.has(b.id)) - Number(own.has(a.id)) || a.name.localeCompare(b.name));
   }
   const { data } = await supabase
     .from("team_members")

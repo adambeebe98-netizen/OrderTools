@@ -24,7 +24,8 @@ export const httpUrl = z
   }, "Enter a full link starting with https://");
 
 const optionalUrl = z
-  .union([httpUrl, z.literal(""), z.null(), z.undefined()])
+  .union([httpUrl, z.literal(""), z.null()])
+  .optional()
   .transform((v) => (v ? v : null));
 
 export const technicianNameSchema = z

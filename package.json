@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "playwright test --trace off",
+    "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,realtime",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
+    "db:seed:generate": "python3 scripts/gen-seed.py",
+    "bootstrap": "tsx scripts/bootstrap.mts",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.4.1",
@@ -51,5 +61,8 @@
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.1.1"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
