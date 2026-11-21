@@ -21,7 +21,15 @@ export default async function CatalogPage({
   return (
     <>
       <PageHeader title="Catalog" description="What technicians can pick from. Changes show up on the request page right away." />
-      <CatalogManager teamId={teamId} categories={catalog.categories} items={catalog.items} custom={custom} initialTab={validTab} />
+      <CatalogManager
+        teamId={teamId}
+        categories={catalog.categories}
+        items={catalog.items}
+        groups={catalog.groups}
+        requestedIds={catalog.requestedIds}
+        custom={custom}
+        initialTab={validTab}
+      />
     </>
   );
 }

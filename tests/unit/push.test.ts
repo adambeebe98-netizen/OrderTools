@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const sendNotification = vi.fn();
-vi.mock("web-push", () => ({ default: { setVapidDetails: vi.fn(), sendNotification } }));
+// Shape matches the real CommonJS module (no default export).
+vi.mock("web-push", () => ({ setVapidDetails: vi.fn(), sendNotification }));
 
 // Minimal fake of the Supabase query builder used by push.ts.
 const deleted: string[][] = [];

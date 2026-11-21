@@ -12,9 +12,23 @@ export type PublicCatalogItem = {
   unit: string | null;
   category_id: string | null;
   grainger_sku: string | null;
+  group_id: string | null;
+  attributes: Record<string, string>;
+  icon: string | null;
+  sort_order: number;
 };
 
 export type PublicCategory = { id: string; name: string };
+
+export type PublicProductGroup = {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  category_id: string | null;
+  attribute_names: string[];
+  sort_order: number;
+};
 
 /** Public view of a team link: team name + active catalog. Nothing else is exposed. */
 export const getPublicTeam = cache(async (slug: string) => {
@@ -31,7 +45,7 @@ export const getPublicTeam = cache(async (slug: string) => {
 
 export async function getPublicCatalog(teamId: string) {
   const supabase = createServiceClient();
-  const [cats, items] = await Promise.all([
+  const [cats, items, groups] = await Promise.all([
     supabase
       .from("categories")
       .select("id, name")
@@ -41,7 +55,14 @@ export async function getPublicCatalog(teamId: string) {
       .order("name"),
     supabase
       .from("catalog_items")
-      .select("id, name, description, image_url, unit, category_id, grainger_sku")
+      .select("id, name, description, image_url, unit, category_id, grainger_sku, group_id, attributes, icon, sort_order")
+      .eq("team_id", teamId)
+      .is("archived_at", null)
+      .order("sort_order")
+      .order("name"),
+    supabase
+      .from("product_groups")
+      .select("id, name, description, icon, category_id, attribute_names, sort_order")
       .eq("team_id", teamId)
       .is("archived_at", null)
       .order("sort_order")
@@ -49,13 +70,21 @@ export async function getPublicCatalog(teamId: string) {
   ]);
   if (cats.error) throw cats.error;
   if (items.error) throw items.error;
+  if (groups.error) throw groups.error;
   const categoryIds = new Set(cats.data.map((c) => c.id));
+  const visibleCategory = (id: string | null) => (id && categoryIds.has(id) ? id : null);
+  const groupById = new Map(groups.data.map((g) => [g.id, g]));
   return {
     categories: cats.data as PublicCategory[],
-    items: (items.data as PublicCatalogItem[]).map((i) => ({
-      ...i,
-      category_id: i.category_id && categoryIds.has(i.category_id) ? i.category_id : null,
-    })),
+    groups: groups.data.map((g) => ({ ...g, category_id: visibleCategory(g.category_id) })) as PublicProductGroup[],
+    // Variants of archived groups are hidden; a variant shows in its group's category.
+    items: (items.data as PublicCatalogItem[])
+      .filter((i) => !i.group_id || groupById.has(i.group_id))
+      .map((i) => ({
+        ...i,
+        attributes: (i.attributes ?? {}) as Record<string, string>,
+        category_id: visibleCategory(i.group_id ? (groupById.get(i.group_id)?.category_id ?? null) : i.category_id),
+      })),
   };
 }
 

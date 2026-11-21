@@ -1,5 +1,6 @@
-name,category,unit,description,grainger_sku,grainger_url,image_url
-"Masonry Drill Bit 1/4"" x 6""",Drill Bits & Drivers,each,Carbide tip for brick and block,,https://www.grainger.com/search?searchQuery=masonry+drill+bit,
-Electrical Tape Black 3/4in x 66ft,Electrical & Wire,roll,"Vinyl, UL listed",,,
-Drywall Anchors Self-Drilling #8,Anchors & Fasteners,box,Box of 100,,,
-Fish Rod Kit (Glow Rods),Tools,kit,Fiberglass glow rods,,,
+name,category,group,options,icon,unit,description,grainger_sku,grainger_url,image_url
+,Drill Bits,Long Bit,"Type: Wood | Size: 1/4""",drill-bit,each,Long installer bit for wood,,,
+,Drill Bits,Long Bit,"Type: Masonry | Size: 3/8""",drill-bit,each,Carbide tip for brick and concrete,,,
+,Drill Bits,Hole Saw,"Size: 3/4""",hole-saw,each,,,,
+Zip Ties,Wiring & Connectors,,,zip-tie,bag,,,,
+Electrical Tape,Wiring & Connectors,,,tape,roll,,,,

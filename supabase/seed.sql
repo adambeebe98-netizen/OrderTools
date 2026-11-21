@@ -19,14 +19,38 @@ values (gen_random_uuid(), '81bb9e7a-54a0-5b75-bef3-df66ef2e61e8', '81bb9e7a-54a
 update public.profiles set is_super_admin = true where id = '33ccb7b0-0837-5724-bb82-24a0ea644d54';
 insert into public.teams (id, name, slug) values ('fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'North Install Team', 'north-install-demo'), ('86740146-1c64-5f17-b209-3889e58e1ec3', 'South Install Team', 'south-install-demo');
 insert into public.team_members (team_id, user_id, last_seen_at) values ('fb4dc8c8-25c3-5605-ad64-5e2129faa323', '33ccb7b0-0837-5724-bb82-24a0ea644d54', now() - interval '2 days'), ('86740146-1c64-5f17-b209-3889e58e1ec3', '81bb9e7a-54a0-5b75-bef3-df66ef2e61e8', now());
-insert into public.categories (id, team_id, name, sort_order) values ('37d6482c-7749-5ea7-817c-f0a534866691', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Drill Bits & Drivers', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('89377346-7246-5200-b1f5-2f0bd86374fb', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Masonry Drill Bit 1/4" x 6"', 'Carbide tip for brick, block and concrete. Tapcon/anchor pilot holes.', 'each', 'DEMO-1001', 'https://www.grainger.com/search?searchQuery=Masonry+Drill+Bit+1/4"+x+6"', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('86aa7630-dfc1-5f91-8f61-953ca4824718', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Masonry Drill Bit 3/16" x 6"', 'Pilot size for 1/4" Tapcon screws.', 'each', 'DEMO-1002', 'https://www.grainger.com/search?searchQuery=Masonry+Drill+Bit+3/16"+x+6"', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('5da81058-2013-56a2-97df-3d1c000c2b75', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Long Installer Bit 3/8" x 18"', 'Flexible-shank installer bit for running wire through walls.', 'each', 'DEMO-1003', 'https://www.grainger.com/search?searchQuery=Long+Installer+Bit+3/8"+x+18"', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('3f5fcad8-8400-5932-a698-3e3292d2451d', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Spade Bit Set (6 pc)', '3/8" to 1" paddle bits for wood framing.', 'set', 'DEMO-1004', 'https://www.grainger.com/search?searchQuery=Spade+Bit+Set', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('baa9be7a-30d5-59a6-860e-17eace9d265e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Step Drill Bit 1/8"–1/2"', 'For enclosures and sheet metal.', 'each', null, 'https://www.grainger.com/search?searchQuery=Step+Drill+Bit+1/8"–1/2"', 4);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('b5f19a72-9e5d-5c0b-82db-265b4564162e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Impact Driver Bit Set (#2 Phillips / Square)', null, 'pack', 'DEMO-1006', 'https://www.grainger.com/search?searchQuery=Impact+Driver+Bit+Set', 5);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('f5834c41-58b4-5e4d-a118-cfb5c2d491e6', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '37d6482c-7749-5ea7-817c-f0a534866691', 'Hole Saw 1-1/2" Bi-Metal', 'Low-voltage boxes and grommets.', 'each', null, 'https://www.grainger.com/search?searchQuery=Hole+Saw+1-1/2"+Bi-Metal', 6);
+insert into public.categories (id, team_id, name, sort_order) values ('9f16a77f-f9ca-552c-8dd0-01186232f512', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Drill Bits', 0);
+insert into public.categories (id, team_id, name, sort_order) values ('1714c714-384d-52f3-8044-5dfcc3e26d4d', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Wiring & Connectors', 1);
+insert into public.categories (id, team_id, name, sort_order) values ('4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Mounting & Sealing', 2);
+insert into public.categories (id, team_id, name, sort_order) values ('841a7a16-937f-5097-8865-db7a6be06499', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Power', 3);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('f555c605-dc8d-5409-a04f-1f01d9bdd5aa', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Wood Bit 1/8"', 'Long installer bit for wood', 'each', 0);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('49d4f367-864a-5076-9480-d4cea8170fbb', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Wood Bit 1/4"', 'Long installer bit for wood', 'each', 1);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('10b8af3a-dbc4-5e47-b171-cb3f7cb965be', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Wood Bit 3/8"', 'Long installer bit for wood', 'each', 2);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('c2f8ee9a-9c23-592c-aacf-89052e233069', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Wood Bit 1/2"', 'Long installer bit for wood', 'each', 3);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('0dace08f-8e07-5167-b72a-44e037bd089d', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Short Wood Bit 1/4"', 'Standard-length wood bit', 'each', 4);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('6c070ceb-b56e-5528-b808-ef653d0ecaa1', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Short Wood Bit 3/8"', 'Standard-length wood bit', 'each', 5);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('1de01534-a9bd-5d69-8003-2df8e591950c', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Masonry Bit 1/4"', 'Carbide tip for brick and concrete', 'each', 6);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('04a61f59-684b-5218-9e79-d9302af2fa84', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Masonry Bit 3/8"', 'Carbide tip for brick and concrete', 'each', 7);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('d063c980-fa0f-5584-b95c-06d9b3eb47af', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Long Masonry Bit 1/2"', 'Carbide tip for brick and concrete', 'each', 8);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('246938f3-3a6f-5fed-b725-98b53001b217', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Extra-Long Masonry Bit 3/8"', 'Extra-long carbide bit for thick walls', 'each', 9);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('e6340951-6298-576b-b11f-17a3e7a2248f', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Extra-Long Masonry Bit 1/2"', 'Extra-long carbide bit for thick walls', 'each', 10);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('153d2bc2-783b-5330-9421-1da5ef7f23db', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Hole Saw Bit 3/4"', null, 'each', 11);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('9a977ee5-7e53-5a40-aa48-320261da4308', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '9f16a77f-f9ca-552c-8dd0-01186232f512', 'Speedbor Spade Bit 3/4"', null, 'each', 12);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('dc428d36-8dc4-58cb-91a5-f770b9218091', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'RJ45 Connectors', null, 'bag', 13);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('596d8c5b-fe79-5dcc-8c92-adabd737bacc', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'Dolphin Beans', 'White gel-filled crimp connectors for alarm wiring', 'bag', 14);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('6624278d-5300-519b-87bd-a2c0149496ea', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'Wire Nuts', 'Twist-on wire connectors', 'bag', 15);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('a9bf0733-c4fa-56a8-9b71-5ea72cf684c4', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'Electrical Tape', null, 'roll', 16);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('f9207361-1e47-5a07-8e60-2d5fc20a3d09', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'Zip Ties', null, 'bag', 17);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('3e165ae1-a139-5401-b731-466e03a35636', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1714c714-384d-52f3-8044-5dfcc3e26d4d', 'Staples', 'Cable staples', 'box', 18);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('3f751304-5913-5809-bfdd-6476d9f6a221', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Screws', 'Our standard install screws', 'box', 19);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('67d8d21e-a5e2-52c7-9cb3-4cb5d4e11954', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Sign Hardware', null, 'set', 20);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('ba1631dc-d341-5b99-9f6c-a4e2feef8d15', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Raceway', 'Surface wire raceway', 'each', 21);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('2fba4c65-833e-50e8-9f92-ab7503c82411', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Double-Sided Mounting Tape', null, 'roll', 22);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('1f700b0f-8086-54f1-ad22-9042a6c7d69f', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Silicone Sealant', null, 'tube', 23);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('b5fcbc20-304e-557f-80ae-6965a2a5dd17', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '4aaea81d-b3d8-50be-9336-bcca533cb4e5', 'Putty', null, 'each', 24);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('4f086507-f0f4-5288-a4b3-a223e632a5e8', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '841a7a16-937f-5097-8865-db7a6be06499', '3-Way Plug Splitter', 'One outlet into three', 'each', 25);
+insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('a7eea5d2-1fb8-5229-b06b-e79960a8925c', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '841a7a16-937f-5097-8865-db7a6be06499', 'Power Strip', null, 'each', 26);
+update public.catalog_items set grainger_sku = 'DEMO-1001', grainger_url = 'https://www.grainger.com/search?searchQuery=masonry+bit' where id = '04a61f59-684b-5218-9e79-d9302af2fa84';
 insert into public.categories (id, team_id, name, sort_order) values ('e09d5a9a-3443-507f-af20-b6485c75cf81', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Drill Bits & Drivers', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('310de4f4-810b-562c-aa68-4ce3772e3cc1', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e09d5a9a-3443-507f-af20-b6485c75cf81', 'Masonry Drill Bit 1/4" x 6"', 'Carbide tip for brick, block and concrete. Tapcon/anchor pilot holes.', 'each', 'DEMO-1001', 'https://www.grainger.com/search?searchQuery=Masonry+Drill+Bit+1/4"+x+6"', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('4edfd2e7-8cf5-565f-a6a2-cba0fc2e48ae', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e09d5a9a-3443-507f-af20-b6485c75cf81', 'Masonry Drill Bit 3/16" x 6"', 'Pilot size for 1/4" Tapcon screws.', 'each', 'DEMO-1002', 'https://www.grainger.com/search?searchQuery=Masonry+Drill+Bit+3/16"+x+6"', 1);
@@ -35,13 +59,6 @@ insert into public.catalog_items (id, team_id, category_id, name, description, u
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('132d44f7-c5e0-5f85-ae2b-40d6bf0c8ea3', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e09d5a9a-3443-507f-af20-b6485c75cf81', 'Step Drill Bit 1/8"–1/2"', 'For enclosures and sheet metal.', 'each', null, 'https://www.grainger.com/search?searchQuery=Step+Drill+Bit+1/8"–1/2"', 4);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('31253c58-ff26-5754-9539-5ee3cbfc64a4', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e09d5a9a-3443-507f-af20-b6485c75cf81', 'Impact Driver Bit Set (#2 Phillips / Square)', null, 'pack', 'DEMO-1006', 'https://www.grainger.com/search?searchQuery=Impact+Driver+Bit+Set', 5);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('3b9bf072-3f30-5859-8dd6-7d751206a237', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e09d5a9a-3443-507f-af20-b6485c75cf81', 'Hole Saw 1-1/2" Bi-Metal', 'Low-voltage boxes and grommets.', 'each', null, 'https://www.grainger.com/search?searchQuery=Hole+Saw+1-1/2"+Bi-Metal', 6);
-insert into public.categories (id, team_id, name, sort_order) values ('dcbc0a38-f776-5558-8287-ed7365a83de9', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Anchors & Fasteners', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('ff25c560-59d5-5cc0-9dfb-1c0cceffc43b', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Drywall Anchors, Self-Drilling #8', 'Holds up to 50 lb. Box of 100.', 'box', 'DEMO-2001', 'https://www.grainger.com/search?searchQuery=Drywall+Anchors', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('959692c6-1242-5305-8851-7a5f1248a854', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Toggle Bolts 1/8" (Snaptoggle)', 'Heavy-duty hollow-wall anchors.', 'pack', 'DEMO-2002', 'https://www.grainger.com/search?searchQuery=Toggle+Bolts+1/8"', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('66e58762-3aeb-56e2-a510-008ccc48795e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Tapcon Concrete Screws 1/4" x 1-3/4"', 'Box of 100.', 'box', 'DEMO-2003', 'https://www.grainger.com/search?searchQuery=Tapcon+Concrete+Screws+1/4"+x+1-3/4"', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('93d469db-beb3-584a-a880-bb530a959c71', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Wood Screws #8 x 1-1/4"', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Wood+Screws+#8+x+1-1/4"', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('d06929cb-7a1b-5179-b6a9-3f05f618207a', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Plastic Ribbed Anchors #6-8', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Plastic+Ribbed+Anchors+#6-8', 4);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('3a623f77-6b72-5796-aba5-ce158f42106d', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'dcbc0a38-f776-5558-8287-ed7365a83de9', 'Cable Staples, Insulated (Coax/Cat6)', 'Bag of 100.', 'bag', 'DEMO-2006', 'https://www.grainger.com/search?searchQuery=Cable+Staples', 5);
 insert into public.categories (id, team_id, name, sort_order) values ('9825cf53-4e0e-5054-a9d2-78ad0b7aa488', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Anchors & Fasteners', 1);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('10d17e9c-d43b-53eb-9205-5b5e01114931', '86740146-1c64-5f17-b209-3889e58e1ec3', '9825cf53-4e0e-5054-a9d2-78ad0b7aa488', 'Drywall Anchors, Self-Drilling #8', 'Holds up to 50 lb. Box of 100.', 'box', 'DEMO-2001', 'https://www.grainger.com/search?searchQuery=Drywall+Anchors', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('c966986a-2e81-5916-b9c1-b1966a393dc6', '86740146-1c64-5f17-b209-3889e58e1ec3', '9825cf53-4e0e-5054-a9d2-78ad0b7aa488', 'Toggle Bolts 1/8" (Snaptoggle)', 'Heavy-duty hollow-wall anchors.', 'pack', 'DEMO-2002', 'https://www.grainger.com/search?searchQuery=Toggle+Bolts+1/8"', 1);
@@ -49,15 +66,6 @@ insert into public.catalog_items (id, team_id, category_id, name, description, u
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('535ae2c8-2a1d-5ff7-ba9f-6718618f967b', '86740146-1c64-5f17-b209-3889e58e1ec3', '9825cf53-4e0e-5054-a9d2-78ad0b7aa488', 'Wood Screws #8 x 1-1/4"', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Wood+Screws+#8+x+1-1/4"', 3);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('c38f7f1a-ab31-5a6a-bd87-6c1518628ec5', '86740146-1c64-5f17-b209-3889e58e1ec3', '9825cf53-4e0e-5054-a9d2-78ad0b7aa488', 'Plastic Ribbed Anchors #6-8', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Plastic+Ribbed+Anchors+#6-8', 4);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('a5df5b00-7f88-586e-b0f7-0ed6626a62a7', '86740146-1c64-5f17-b209-3889e58e1ec3', '9825cf53-4e0e-5054-a9d2-78ad0b7aa488', 'Cable Staples, Insulated (Coax/Cat6)', 'Bag of 100.', 'bag', 'DEMO-2006', 'https://www.grainger.com/search?searchQuery=Cable+Staples', 5);
-insert into public.categories (id, team_id, name, sort_order) values ('1281e25a-34c2-55de-9f4e-caec89362c17', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Electrical & Wire', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('63b8ddc5-9e9c-56fd-802a-9f9110956dc1', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Electrical Tape, Black 3/4" x 66''', 'Vinyl, UL listed.', 'roll', 'DEMO-3001', 'https://www.grainger.com/search?searchQuery=Electrical+Tape', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('46ef92d8-a62a-5282-9610-f5c19e441099', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Wire Nuts, Assorted', 'Yellow/red/orange. Bag of 100.', 'bag', 'DEMO-3002', 'https://www.grainger.com/search?searchQuery=Wire+Nuts', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('4f6feecf-0cee-5db9-a559-f4726223b9a9', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Wago 221 Lever Connectors (3-port)', 'Box of 50.', 'box', 'DEMO-3003', 'https://www.grainger.com/search?searchQuery=Wago+221+Lever+Connectors', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('148f7b3c-0e7a-5782-973a-d412481d4b79', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Cable Ties 8" Black UV', 'Bag of 100.', 'bag', 'DEMO-3004', 'https://www.grainger.com/search?searchQuery=Cable+Ties+8"+Black+UV', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('f7439f5c-31bd-5056-ba5d-cbffce6067cd', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Velcro Cable Wraps', 'Roll of 25 ft.', 'roll', null, 'https://www.grainger.com/search?searchQuery=Velcro+Cable+Wraps', 4);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('780cec82-f36f-5f66-a660-a999fa23705e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Low-Voltage Mounting Bracket (1-gang)', 'Old-work ring for low-voltage boxes.', 'each', 'DEMO-3006', 'https://www.grainger.com/search?searchQuery=Low-Voltage+Mounting+Bracket', 5);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('b1c714fe-57f1-51e9-87bd-b5a76cbbaef9', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Cat6 Keystone Jacks', 'Pack of 10.', 'pack', null, 'https://www.grainger.com/search?searchQuery=Cat6+Keystone+Jacks', 6);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('347e1f81-73fe-5225-8d45-1d57dfccb993', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '1281e25a-34c2-55de-9f4e-caec89362c17', 'Heat Shrink Tubing Assortment', null, 'pack', null, 'https://www.grainger.com/search?searchQuery=Heat+Shrink+Tubing+Assortment', 7);
 insert into public.categories (id, team_id, name, sort_order) values ('b6a35978-db1a-5db5-9659-d4eb39b41561', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Electrical & Wire', 2);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('d75b9dd1-2e0b-50d7-b1fe-b81f4cd8b52c', '86740146-1c64-5f17-b209-3889e58e1ec3', 'b6a35978-db1a-5db5-9659-d4eb39b41561', 'Electrical Tape, Black 3/4" x 66''', 'Vinyl, UL listed.', 'roll', 'DEMO-3001', 'https://www.grainger.com/search?searchQuery=Electrical+Tape', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('c1a23d5c-a3ee-5da8-b7c8-ac54ef53c935', '86740146-1c64-5f17-b209-3889e58e1ec3', 'b6a35978-db1a-5db5-9659-d4eb39b41561', 'Wire Nuts, Assorted', 'Yellow/red/orange. Bag of 100.', 'bag', 'DEMO-3002', 'https://www.grainger.com/search?searchQuery=Wire+Nuts', 1);
@@ -67,13 +75,6 @@ insert into public.catalog_items (id, team_id, category_id, name, description, u
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('e72a4079-a2b2-54a4-9e85-7a3fa7f47d83', '86740146-1c64-5f17-b209-3889e58e1ec3', 'b6a35978-db1a-5db5-9659-d4eb39b41561', 'Low-Voltage Mounting Bracket (1-gang)', 'Old-work ring for low-voltage boxes.', 'each', 'DEMO-3006', 'https://www.grainger.com/search?searchQuery=Low-Voltage+Mounting+Bracket', 5);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('be20f371-6020-5cfb-9d18-2d35869320f0', '86740146-1c64-5f17-b209-3889e58e1ec3', 'b6a35978-db1a-5db5-9659-d4eb39b41561', 'Cat6 Keystone Jacks', 'Pack of 10.', 'pack', null, 'https://www.grainger.com/search?searchQuery=Cat6+Keystone+Jacks', 6);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('bd21025d-af13-5479-9515-a1e9cc4c77d9', '86740146-1c64-5f17-b209-3889e58e1ec3', 'b6a35978-db1a-5db5-9659-d4eb39b41561', 'Heat Shrink Tubing Assortment', null, 'pack', null, 'https://www.grainger.com/search?searchQuery=Heat+Shrink+Tubing+Assortment', 7);
-insert into public.categories (id, team_id, name, sort_order) values ('cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Tools', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('98e5039c-84ef-56f7-a6da-cf399a18d3ef', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Fish Rod Kit (Glow Rods)', 'Fiberglass fish/glow rods for running wire.', 'kit', 'DEMO-4001', 'https://www.grainger.com/search?searchQuery=Fish+Rod+Kit', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('b1187385-19b1-58bf-8559-9360733fffe7', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Fish Tape 50''', 'Steel fish tape.', 'each', null, 'https://www.grainger.com/search?searchQuery=Fish+Tape+50''', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('6b0ef8a3-aa5b-5659-9697-cdfa68fe564e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Stud Finder', null, 'each', null, 'https://www.grainger.com/search?searchQuery=Stud+Finder', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('5d70f30e-98ba-5b71-9069-02353ca5f022', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Utility Knife Blades', 'Pack of 100.', 'pack', 'DEMO-4004', 'https://www.grainger.com/search?searchQuery=Utility+Knife+Blades', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('81fdbf34-d9e8-57b8-b50a-30eaff8ddf8d', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Drywall Jab Saw', null, 'each', null, 'https://www.grainger.com/search?searchQuery=Drywall+Jab+Saw', 4);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('44cff95d-8b82-5deb-bda1-c238f6caaa31', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'cba4a983-46a0-570a-ac05-0d9ca7754dc2', 'Torpedo Level 9"', 'Magnetic.', 'each', null, 'https://www.grainger.com/search?searchQuery=Torpedo+Level+9"', 5);
 insert into public.categories (id, team_id, name, sort_order) values ('68801904-0736-566a-90cd-99e229bc9527', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Tools', 3);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('41e496bd-f279-56df-9473-6e04ba330402', '86740146-1c64-5f17-b209-3889e58e1ec3', '68801904-0736-566a-90cd-99e229bc9527', 'Fish Rod Kit (Glow Rods)', 'Fiberglass fish/glow rods for running wire.', 'kit', 'DEMO-4001', 'https://www.grainger.com/search?searchQuery=Fish+Rod+Kit', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('2d469ff9-7109-5300-a1b3-054121b2504a', '86740146-1c64-5f17-b209-3889e58e1ec3', '68801904-0736-566a-90cd-99e229bc9527', 'Fish Tape 50''', 'Steel fish tape.', 'each', null, 'https://www.grainger.com/search?searchQuery=Fish+Tape+50''', 1);
@@ -81,42 +82,177 @@ insert into public.catalog_items (id, team_id, category_id, name, description, u
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('90bff056-8e86-5204-8ec1-fcc22e205d32', '86740146-1c64-5f17-b209-3889e58e1ec3', '68801904-0736-566a-90cd-99e229bc9527', 'Utility Knife Blades', 'Pack of 100.', 'pack', 'DEMO-4004', 'https://www.grainger.com/search?searchQuery=Utility+Knife+Blades', 3);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('9aae6227-e1ac-500c-b50c-f7148ae143d5', '86740146-1c64-5f17-b209-3889e58e1ec3', '68801904-0736-566a-90cd-99e229bc9527', 'Drywall Jab Saw', null, 'each', null, 'https://www.grainger.com/search?searchQuery=Drywall+Jab+Saw', 4);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('310c6e3c-443e-5606-b22e-5c584b61a557', '86740146-1c64-5f17-b209-3889e58e1ec3', '68801904-0736-566a-90cd-99e229bc9527', 'Torpedo Level 9"', 'Magnetic.', 'each', null, 'https://www.grainger.com/search?searchQuery=Torpedo+Level+9"', 5);
-insert into public.categories (id, team_id, name, sort_order) values ('13009eec-2224-5ec2-96f6-2d6ac8d903a9', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Sealants & Patching', 4);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('79caaec5-6d33-5a2c-bb17-736b24c53701', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '13009eec-2224-5ec2-96f6-2d6ac8d903a9', 'Clear Silicone Sealant 10 oz', 'Exterior penetrations.', 'tube', 'DEMO-5001', 'https://www.grainger.com/search?searchQuery=Clear+Silicone+Sealant+10+oz', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('71a13cb8-40d0-56eb-9581-55aac776582e', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '13009eec-2224-5ec2-96f6-2d6ac8d903a9', 'Spackle / Lightweight Patch 8 oz', null, 'tub', null, 'https://www.grainger.com/search?searchQuery=Spackle+/+Lightweight+Patch+8+oz', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('2fb69122-9b2a-5868-bd58-6d1079b787ff', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '13009eec-2224-5ec2-96f6-2d6ac8d903a9', 'Duct Seal Compound 1 lb', 'Seal exterior wire entries.', 'each', null, 'https://www.grainger.com/search?searchQuery=Duct+Seal+Compound+1+lb', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('7540da5d-ef62-5a45-a54c-d0eaec0a8f73', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '13009eec-2224-5ec2-96f6-2d6ac8d903a9', 'Painter''s Tape 1"', null, 'roll', null, 'https://www.grainger.com/search?searchQuery=Painter''s+Tape+1"', 3);
 insert into public.categories (id, team_id, name, sort_order) values ('e442b934-0582-5ddb-92f0-b77e9314b21c', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Sealants & Patching', 4);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('4ac3b19b-ab7f-58e1-a8e2-3e7c5eba66ca', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e442b934-0582-5ddb-92f0-b77e9314b21c', 'Clear Silicone Sealant 10 oz', 'Exterior penetrations.', 'tube', 'DEMO-5001', 'https://www.grainger.com/search?searchQuery=Clear+Silicone+Sealant+10+oz', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('56e20982-4737-5845-a7b0-9ea2de75578e', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e442b934-0582-5ddb-92f0-b77e9314b21c', 'Spackle / Lightweight Patch 8 oz', null, 'tub', null, 'https://www.grainger.com/search?searchQuery=Spackle+/+Lightweight+Patch+8+oz', 1);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('e9b6d9a6-f0bd-511b-92f9-08af2719af2e', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e442b934-0582-5ddb-92f0-b77e9314b21c', 'Duct Seal Compound 1 lb', 'Seal exterior wire entries.', 'each', null, 'https://www.grainger.com/search?searchQuery=Duct+Seal+Compound+1+lb', 2);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('f15ba6f9-ca49-5a65-873f-6eb5f9171c85', '86740146-1c64-5f17-b209-3889e58e1ec3', 'e442b934-0582-5ddb-92f0-b77e9314b21c', 'Painter''s Tape 1"', null, 'roll', null, 'https://www.grainger.com/search?searchQuery=Painter''s+Tape+1"', 3);
-insert into public.categories (id, team_id, name, sort_order) values ('74b2e827-d564-5119-8955-08f0ed1db521', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', 'Safety & Cleanup', 5);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('c60ee932-617f-5e4e-b742-1e4e3af49ded', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '74b2e827-d564-5119-8955-08f0ed1db521', 'Nitrile Gloves (L)', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Nitrile+Gloves', 0);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('03d29fce-62cc-5829-a9ea-49bbf702b8a1', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '74b2e827-d564-5119-8955-08f0ed1db521', 'Safety Glasses, Clear', null, 'each', 'DEMO-6002', 'https://www.grainger.com/search?searchQuery=Safety+Glasses', 1);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('c691efba-675d-5b00-9e65-5049b2da4e09', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '74b2e827-d564-5119-8955-08f0ed1db521', 'Shoe Covers', 'Box of 150. Required in customer homes.', 'box', 'DEMO-6003', 'https://www.grainger.com/search?searchQuery=Shoe+Covers', 2);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('a58a1745-10cb-5c8a-b4a4-b3efbf4d7698', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '74b2e827-d564-5119-8955-08f0ed1db521', 'Shop Towels', 'Roll of 55.', 'roll', null, 'https://www.grainger.com/search?searchQuery=Shop+Towels', 3);
-insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('df1ea3f2-00d0-5b94-88b6-d9856c2ea58a', 'fb4dc8c8-25c3-5605-ad64-5e2129faa323', '74b2e827-d564-5119-8955-08f0ed1db521', 'Dust Masks N95', 'Box of 20.', 'box', null, 'https://www.grainger.com/search?searchQuery=Dust+Masks+N95', 4);
 insert into public.categories (id, team_id, name, sort_order) values ('1e069a04-360d-5c85-9fcd-41abd5262db6', '86740146-1c64-5f17-b209-3889e58e1ec3', 'Safety & Cleanup', 5);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('12419a02-8121-5e2b-b542-517d2835fdef', '86740146-1c64-5f17-b209-3889e58e1ec3', '1e069a04-360d-5c85-9fcd-41abd5262db6', 'Nitrile Gloves (L)', 'Box of 100.', 'box', null, 'https://www.grainger.com/search?searchQuery=Nitrile+Gloves', 0);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('b41807e1-98d4-5c24-86aa-5cbe166da4a3', '86740146-1c64-5f17-b209-3889e58e1ec3', '1e069a04-360d-5c85-9fcd-41abd5262db6', 'Safety Glasses, Clear', null, 'each', 'DEMO-6002', 'https://www.grainger.com/search?searchQuery=Safety+Glasses', 1);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('5ee922ec-b85d-5e1f-9f5c-d38493b03a49', '86740146-1c64-5f17-b209-3889e58e1ec3', '1e069a04-360d-5c85-9fcd-41abd5262db6', 'Shoe Covers', 'Box of 150. Required in customer homes.', 'box', 'DEMO-6003', 'https://www.grainger.com/search?searchQuery=Shoe+Covers', 2);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('6b19ec07-e0c3-5440-90ae-3051915a8c64', '86740146-1c64-5f17-b209-3889e58e1ec3', '1e069a04-360d-5c85-9fcd-41abd5262db6', 'Shop Towels', 'Roll of 55.', 'roll', null, 'https://www.grainger.com/search?searchQuery=Shop+Towels', 3);
 insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('71915457-645e-544b-8ddb-6a5faf5bfa1f', '86740146-1c64-5f17-b209-3889e58e1ec3', '1e069a04-360d-5c85-9fcd-41abd5262db6', 'Dust Masks N95', 'Box of 20.', 'box', null, 'https://www.grainger.com/search?searchQuery=Dust+Masks+N95', 4);
-select public.submit_request('north-install-demo', 'Mike Torres', '[{"catalog_item_id": "89377346-7246-5200-b1f5-2f0bd86374fb", "quantity": 2}, {"catalog_item_id": "63b8ddc5-9e9c-56fd-802a-9f9110956dc1", "quantity": 4}, {"catalog_item_id": "ff25c560-59d5-5cc0-9dfb-1c0cceffc43b", "quantity": 1}]'::jsonb, null);
+select public.submit_request('north-install-demo', 'Mike Torres', '[{"catalog_item_id": "04a61f59-684b-5218-9e79-d9302af2fa84", "quantity": 2}, {"catalog_item_id": "a9bf0733-c4fa-56a8-9b71-5ea72cf684c4", "quantity": 4}, {"catalog_item_id": "f9207361-1e47-5a07-8e60-2d5fc20a3d09", "quantity": 1}]'::jsonb, null);
 update public.requests set created_at = now() - interval '3 days' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';
-select public.submit_request('north-install-demo', 'Sarah Kim', '[{"catalog_item_id": "89377346-7246-5200-b1f5-2f0bd86374fb", "quantity": 1}, {"catalog_item_id": "98e5039c-84ef-56f7-a6da-cf399a18d3ef", "quantity": 1}, {"catalog_item_id": "148f7b3c-0e7a-5782-973a-d412481d4b79", "quantity": 2}, {"custom_name": "Right-angle drill attachment", "quantity": 1, "custom_note": "For tight joist bays", "custom_url": null}]'::jsonb, 'Lost my glow rods on the Henderson job.');
+select public.submit_request('north-install-demo', 'Sarah Kim', '[{"catalog_item_id": "49d4f367-864a-5076-9480-d4cea8170fbb", "quantity": 1}, {"catalog_item_id": "596d8c5b-fe79-5dcc-8c92-adabd737bacc", "quantity": 2}, {"catalog_item_id": "f9207361-1e47-5a07-8e60-2d5fc20a3d09", "quantity": 2}, {"custom_name": "Right-angle drill attachment", "quantity": 1, "custom_note": "For tight joist bays", "custom_url": null}]'::jsonb, 'Out of beans on the Henderson job.');
 update public.requests set created_at = now() - interval '2 days' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';
-select public.submit_request('north-install-demo', 'Jordan Lee', '[{"catalog_item_id": "63b8ddc5-9e9c-56fd-802a-9f9110956dc1", "quantity": 2}, {"catalog_item_id": "4f6feecf-0cee-5db9-a559-f4726223b9a9", "quantity": 1}, {"catalog_item_id": "c691efba-675d-5b00-9e65-5049b2da4e09", "quantity": 1}]'::jsonb, null);
+select public.submit_request('north-install-demo', 'Jordan Lee', '[{"catalog_item_id": "0dace08f-8e07-5167-b72a-44e037bd089d", "quantity": 2}, {"catalog_item_id": "a9bf0733-c4fa-56a8-9b71-5ea72cf684c4", "quantity": 2}, {"catalog_item_id": "dc428d36-8dc4-58cb-91a5-f770b9218091", "quantity": 1}]'::jsonb, null);
 update public.requests set created_at = now() - interval '1 day' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';
-select public.submit_request('north-install-demo', 'Mike Torres', '[{"catalog_item_id": "959692c6-1242-5305-8851-7a5f1248a854", "quantity": 2}, {"catalog_item_id": "89377346-7246-5200-b1f5-2f0bd86374fb", "quantity": 1}]'::jsonb, null);
+select public.submit_request('north-install-demo', 'Mike Torres', '[{"catalog_item_id": "3f751304-5913-5809-bfdd-6476d9f6a221", "quantity": 2}, {"catalog_item_id": "04a61f59-684b-5218-9e79-d9302af2fa84", "quantity": 1}]'::jsonb, null);
 update public.requests set created_at = now() - interval '5 hours' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';
-select public.submit_request('north-install-demo', 'Priya Patel', '[{"catalog_item_id": "c691efba-675d-5b00-9e65-5049b2da4e09", "quantity": 2}, {"catalog_item_id": "c60ee932-617f-5e4e-b742-1e4e3af49ded", "quantity": 1}, {"catalog_item_id": "63b8ddc5-9e9c-56fd-802a-9f9110956dc1", "quantity": 3}, {"custom_name": "Right angle drill attachment", "quantity": 1, "custom_note": null, "custom_url": null}]'::jsonb, null);
+select public.submit_request('north-install-demo', 'Priya Patel', '[{"catalog_item_id": "596d8c5b-fe79-5dcc-8c92-adabd737bacc", "quantity": 1}, {"catalog_item_id": "f9207361-1e47-5a07-8e60-2d5fc20a3d09", "quantity": 1}, {"catalog_item_id": "a9bf0733-c4fa-56a8-9b71-5ea72cf684c4", "quantity": 3}, {"custom_name": "Right angle drill attachment", "quantity": 1, "custom_note": null, "custom_url": null}]'::jsonb, null);
 update public.requests set created_at = now() - interval '40 minutes' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';
-select public.submit_request('north-install-demo', 'Jordan Lee', '[{"catalog_item_id":"5d70f30e-98ba-5b71-9069-02353ca5f022","quantity":2}]'::jsonb, null);
+select public.submit_request('north-install-demo', 'Jordan Lee', '[{"catalog_item_id":"3e165ae1-a139-5401-b731-466e03a35636","quantity":2}]'::jsonb, null);
 with r as (select id from public.requests where technician_name = 'Jordan Lee' order by created_at desc limit 1)
 update public.requests set created_at = now() - interval '9 days' where id in (select id from r);
 update public.request_items set status = 'ordered', ordered_at = now() - interval '7 days'
  where request_id = (select id from public.requests where technician_name = 'Jordan Lee' order by created_at asc limit 1);
 update public.activity_events set created_at = r.created_at from public.requests r where r.id = activity_events.request_id;
 select public.submit_request('south-install-demo', 'Chris Ortega', '[{"catalog_item_id":"2d469ff9-7109-5300-a1b3-054121b2504a","quantity":1}]'::jsonb, null);
+
+-- =====================================================================
+-- Catalog reorganization: product groups + variants (run ONCE, after the
+-- 20261122000000_product_variants.sql schema migration).
+--
+-- Safe by design:
+--   * Never deletes catalog items or requests. Existing items keep their IDs,
+--     Grainger SKUs, links and units; they are only renamed/grouped.
+--   * Obsolete variants are ARCHIVED (hidden from technicians, kept for history).
+--   * Runs as one statement: any failed check rolls everything back.
+--   * Re-running it is harmless (it finds what it already did).
+-- Generated by scripts/gen-catalog-sql.py from scripts/catalog_def.py.
+-- =====================================================================
+do $migration$
+declare
+  v_team_slug text := 'north-install-demo';   -- null = use the only team in the database
+  v_def jsonb := $json${"categories": ["Drill Bits", "Wiring & Connectors", "Mounting & Sealing", "Power"], "groups": [{"name": "Short Bit", "category": "Drill Bits", "icon": "drill-bit", "description": "Standard-length bits", "attribute_names": ["Type", "Size"], "sort_order": 0, "variants": [{"attributes": {"Type": "Wood", "Size": "3/8\""}, "legacy_names": ["Short Wood Bit 3/8\""], "name": "Short Bit — Wood — 3/8\"", "unit": "each", "description": "Standard-length wood bit", "sort_order": 0}, {"attributes": {"Type": "Masonry", "Size": "1/4\""}, "legacy_names": ["Short Masonry Bit 1/4\""], "name": "Short Bit — Masonry — 1/4\"", "unit": "each", "description": "Standard-length carbide masonry bit", "sort_order": 1}]}, {"name": "Long Bit", "category": "Drill Bits", "icon": "drill-bit", "description": "Long installer bits", "attribute_names": ["Type", "Size"], "sort_order": 1, "variants": [{"attributes": {"Type": "Wood", "Size": "1/8\""}, "legacy_names": ["Long Wood Bit 1/8\""], "name": "Long Bit — Wood — 1/8\"", "unit": "each", "description": "Long installer bit for wood", "sort_order": 0}, {"attributes": {"Type": "Wood", "Size": "1/4\""}, "legacy_names": ["Long Wood Bit 1/4\""], "name": "Long Bit — Wood — 1/4\"", "unit": "each", "description": "Long installer bit for wood", "sort_order": 1}, {"attributes": {"Type": "Wood", "Size": "3/8\""}, "legacy_names": ["Long Wood Bit 3/8\""], "name": "Long Bit — Wood — 3/8\"", "unit": "each", "description": "Long installer bit for wood", "sort_order": 2}, {"attributes": {"Type": "Wood", "Size": "1/2\""}, "legacy_names": ["Long Wood Bit 1/2\""], "name": "Long Bit — Wood — 1/2\"", "unit": "each", "description": "Long installer bit for wood", "sort_order": 3}, {"attributes": {"Type": "Masonry", "Size": "1/4\""}, "legacy_names": ["Long Masonry Bit 1/4\""], "name": "Long Bit — Masonry — 1/4\"", "unit": "each", "description": "Carbide tip for brick and concrete", "sort_order": 4}, {"attributes": {"Type": "Masonry", "Size": "3/8\""}, "legacy_names": ["Long Masonry Bit 3/8\""], "name": "Long Bit — Masonry — 3/8\"", "unit": "each", "description": "Carbide tip for brick and concrete", "sort_order": 5}, {"attributes": {"Type": "Masonry", "Size": "1/2\""}, "legacy_names": ["Long Masonry Bit 1/2\""], "name": "Long Bit — Masonry — 1/2\"", "unit": "each", "description": "Carbide tip for brick and concrete", "sort_order": 6}]}, {"name": "Extra-Long Bit", "category": "Drill Bits", "icon": "drill-bit", "description": "For thick walls", "attribute_names": ["Type", "Size"], "sort_order": 2, "variants": [{"attributes": {"Type": "Masonry", "Size": "3/8\""}, "legacy_names": ["Extra-Long Masonry Bit 3/8\""], "name": "Extra-Long Bit — Masonry — 3/8\"", "unit": "each", "description": "Extra-long carbide bit for thick walls", "sort_order": 0}, {"attributes": {"Type": "Masonry", "Size": "1/2\""}, "legacy_names": ["Extra-Long Masonry Bit 1/2\""], "name": "Extra-Long Bit — Masonry — 1/2\"", "unit": "each", "description": "Extra-long carbide bit for thick walls", "sort_order": 1}]}, {"name": "Hole Saw", "category": "Drill Bits", "icon": "hole-saw", "description": null, "attribute_names": ["Size"], "sort_order": 3, "variants": [{"attributes": {"Size": "3/4\""}, "legacy_names": ["Hole Saw Bit 3/4\""], "name": "Hole Saw — 3/4\"", "unit": "each", "description": null, "sort_order": 0}]}, {"name": "Speedbor", "category": "Drill Bits", "icon": "spade-bit", "description": "Spade bit", "attribute_names": ["Size"], "sort_order": 4, "variants": [{"attributes": {"Size": "3/4\""}, "legacy_names": ["Speedbor Spade Bit 3/4\""], "name": "Speedbor — 3/4\"", "unit": "each", "description": null, "sort_order": 0}]}], "obsolete": ["Short Wood Bit 1/4\""], "standalone": [{"name": "RJ45 Connectors", "category": "Wiring & Connectors", "icon": "rj45", "unit": "bag", "description": null, "sort_order": 100}, {"name": "Dolphin Beans", "category": "Wiring & Connectors", "icon": "gel-connector", "unit": "bag", "description": "White gel-filled crimp connectors for alarm wiring", "sort_order": 101}, {"name": "Wire Nuts", "category": "Wiring & Connectors", "icon": "wire-nut", "unit": "bag", "description": "Twist-on wire connectors", "sort_order": 102}, {"name": "Electrical Tape", "category": "Wiring & Connectors", "icon": "tape", "unit": "roll", "description": null, "sort_order": 103}, {"name": "Zip Ties", "category": "Wiring & Connectors", "icon": "zip-tie", "unit": "bag", "description": null, "sort_order": 104}, {"name": "Staples", "category": "Wiring & Connectors", "icon": "staple", "unit": "box", "description": "Cable staples", "sort_order": 105}, {"name": "Screws", "category": "Mounting & Sealing", "icon": "screw", "unit": "box", "description": "Our standard install screws", "sort_order": 106}, {"name": "Sign Hardware", "category": "Mounting & Sealing", "icon": "sign", "unit": "set", "description": null, "sort_order": 107}, {"name": "Raceway", "category": "Mounting & Sealing", "icon": "raceway", "unit": "each", "description": "Surface wire raceway", "sort_order": 108}, {"name": "Double-Sided Mounting Tape", "category": "Mounting & Sealing", "icon": "tape", "unit": "roll", "description": null, "sort_order": 109}, {"name": "Silicone Sealant", "category": "Mounting & Sealing", "icon": "caulk-tube", "unit": "tube", "description": null, "sort_order": 110}, {"name": "Putty", "category": "Mounting & Sealing", "icon": "putty", "unit": "each", "description": null, "sort_order": 111}, {"name": "3-Way Plug Splitter", "category": "Power", "icon": "splitter", "unit": "each", "description": "One outlet into three", "sort_order": 112}, {"name": "Power Strip", "category": "Power", "icon": "power-strip", "unit": "each", "description": null, "sort_order": 113}]}$json$::jsonb;
+  v_team uuid;
+  v_teams integer;
+  v_cat uuid;
+  v_group uuid;
+  v_item uuid;
+  g jsonb;
+  v jsonb;
+  s jsonb;
+  c text;
+  i integer;
+  v_items_before integer;
+  v_links_before text;
+  v_created integer := 0;
+  v_updated integer := 0;
+  v_archived integer := 0;
+begin
+  if v_team_slug is null then
+    select count(*) into v_teams from public.teams;
+    if v_teams <> 1 then
+      raise exception 'There are % teams. Set v_team_slug at the top of this script to the team to reorganize.', v_teams;
+    end if;
+    select id into v_team from public.teams;
+  else
+    select id into v_team from public.teams where slug = v_team_slug;
+    if v_team is null then raise exception 'No team with slug %', v_team_slug; end if;
+  end if;
+
+  -- Snapshot request data to prove it is untouched.
+  select count(*) into v_items_before from public.request_items where team_id = v_team;
+  select coalesce(string_agg(id::text || ':' || coalesce(catalog_item_id::text, '-') || ':' || name || ':' || coalesce(grainger_sku, ''), ',' order by id), '')
+    into v_links_before from public.request_items where team_id = v_team;
+
+  -- Categories (create if missing; set display order).
+  i := 0;
+  for c in select jsonb_array_elements_text(v_def -> 'categories') loop
+    select id into v_cat from public.categories where team_id = v_team and lower(name) = lower(c);
+    if v_cat is null then
+      insert into public.categories (team_id, name, sort_order) values (v_team, c, i) returning id into v_cat;
+    else
+      update public.categories set sort_order = i, archived_at = null where id = v_cat;
+    end if;
+    i := i + 1;
+  end loop;
+
+  -- Groups and their variants.
+  for g in select * from jsonb_array_elements(v_def -> 'groups') loop
+    select id into v_cat from public.categories where team_id = v_team and lower(name) = lower(g ->> 'category');
+    select id into v_group from public.product_groups
+     where team_id = v_team and lower(name) = lower(g ->> 'name') and archived_at is null;
+    if v_group is null then
+      insert into public.product_groups (team_id, category_id, name, description, icon, attribute_names, sort_order)
+      values (v_team, v_cat, g ->> 'name', g ->> 'description', g ->> 'icon',
+              array(select jsonb_array_elements_text(g -> 'attribute_names')), (g ->> 'sort_order')::int)
+      returning id into v_group;
+    else
+      update public.product_groups
+         set category_id = v_cat, icon = g ->> 'icon', description = g ->> 'description',
+             attribute_names = array(select jsonb_array_elements_text(g -> 'attribute_names')),
+             sort_order = (g ->> 'sort_order')::int
+       where id = v_group;
+    end if;
+
+    for v in select * from jsonb_array_elements(g -> 'variants') loop
+      v_item := null;
+      -- 1) already migrated (same group + attributes)
+      select id into v_item from public.catalog_items
+       where team_id = v_team and group_id = v_group and attributes = v -> 'attributes'
+       order by archived_at nulls first limit 1;
+      -- 2) the original flat item, by its legacy or new name (prefer active)
+      if v_item is null then
+        select id into v_item from public.catalog_items
+         where team_id = v_team and group_id is null
+           and (lower(name) = lower(v ->> 'name')
+                or lower(name) in (select lower(x) from jsonb_array_elements_text(v -> 'legacy_names') x))
+         order by archived_at nulls first, created_at limit 1;
+      end if;
+
+      if v_item is null then
+        insert into public.catalog_items (team_id, category_id, group_id, attributes, name, unit, description, sort_order)
+        values (v_team, v_cat, v_group, v -> 'attributes', v ->> 'name', v ->> 'unit', v ->> 'description', (v ->> 'sort_order')::int);
+        v_created := v_created + 1;
+      else
+        -- Keep id, SKU, URL, image and unit; only regroup, rename and reorder.
+        update public.catalog_items
+           set group_id = v_group, attributes = v -> 'attributes', name = v ->> 'name',
+               category_id = v_cat, sort_order = (v ->> 'sort_order')::int, archived_at = null,
+               description = coalesce(description, v ->> 'description')
+         where id = v_item;
+        v_updated := v_updated + 1;
+      end if;
+    end loop;
+  end loop;
+
+  -- Obsolete variants: archive, never delete.
+  update public.catalog_items set archived_at = now()
+   where team_id = v_team and group_id is null and archived_at is null
+     and lower(name) in (select lower(x) from jsonb_array_elements_text(v_def -> 'obsolete') x);
+  get diagnostics v_archived = row_count;
+
+  -- Standalone items: icon + order (create if missing).
+  for s in select * from jsonb_array_elements(v_def -> 'standalone') loop
+    select id into v_cat from public.categories where team_id = v_team and lower(name) = lower(s ->> 'category');
+    select id into v_item from public.catalog_items
+     where team_id = v_team and group_id is null and lower(name) = lower(s ->> 'name')
+     order by archived_at nulls first, created_at limit 1;
+    if v_item is null then
+      insert into public.catalog_items (team_id, category_id, name, unit, description, icon, sort_order)
+      values (v_team, v_cat, s ->> 'name', s ->> 'unit', s ->> 'description', s ->> 'icon', (s ->> 'sort_order')::int);
+      v_created := v_created + 1;
+    else
+      update public.catalog_items
+         set icon = s ->> 'icon', category_id = coalesce(category_id, v_cat), sort_order = (s ->> 'sort_order')::int
+       where id = v_item;
+      v_updated := v_updated + 1;
+    end if;
+  end loop;
+
+  -- Verify request history is byte-for-byte unchanged.
+  if (select count(*) from public.request_items where team_id = v_team) <> v_items_before
+     or (select coalesce(string_agg(id::text || ':' || coalesce(catalog_item_id::text, '-') || ':' || name || ':' || coalesce(grainger_sku, ''), ',' order by id), '')
+           from public.request_items where team_id = v_team) <> v_links_before then
+    raise exception 'Request data changed unexpectedly; rolled back.';
+  end if;
+
+  raise notice 'Catalog reorganized: % updated, % created, % archived. % request lines verified unchanged.',
+    v_updated, v_created, v_archived, v_items_before;
+end
+$migration$;
+

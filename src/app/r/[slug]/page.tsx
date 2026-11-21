@@ -14,6 +14,7 @@ export default async function TeamRequestPage({ params }: { params: Promise<{ sl
       slug={team.slug}
       teamName={team.name}
       categories={catalog.categories}
+      groups={catalog.groups}
       items={catalog.items}
       popularIds={popularIds}
     />

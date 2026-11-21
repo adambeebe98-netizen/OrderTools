@@ -57,14 +57,14 @@ isOneToOne: false
                   ]
                 },"catalog_items": {
                   Row: {
-                    "archived_at": string | null,"category_id": string | null,"created_at": string,"description": string | null,"grainger_sku": string | null,"grainger_url": string | null,"id": string,"image_url": string | null,"name": string,"sort_order": number,"team_id": string,"unit": string | null,"updated_at": string
+                    "archived_at": string | null,"attributes": NonNullable<Json>,"category_id": string | null,"created_at": string,"description": string | null,"grainger_sku": string | null,"grainger_url": string | null,"group_id": string | null,"icon": string | null,"id": string,"image_url": string | null,"name": string,"sort_order": number,"team_id": string,"unit": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"grainger_sku"?: string | null,"grainger_url"?: string | null,"id"?: string,"image_url"?: string | null,"name": string,"sort_order"?: number,"team_id": string,"unit"?: string | null,"updated_at"?: string
+                    "archived_at"?: string | null,"attributes"?: NonNullable<Json>,"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"grainger_sku"?: string | null,"grainger_url"?: string | null,"group_id"?: string | null,"icon"?: string | null,"id"?: string,"image_url"?: string | null,"name": string,"sort_order"?: number,"team_id": string,"unit"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "archived_at"?: string | null,"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"grainger_sku"?: string | null,"grainger_url"?: string | null,"id"?: string,"image_url"?: string | null,"name"?: string,"sort_order"?: number,"team_id"?: string,"unit"?: string | null,"updated_at"?: string
+                    "archived_at"?: string | null,"attributes"?: NonNullable<Json>,"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"grainger_sku"?: string | null,"grainger_url"?: string | null,"group_id"?: string | null,"icon"?: string | null,"id"?: string,"image_url"?: string | null,"name"?: string,"sort_order"?: number,"team_id"?: string,"unit"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -72,6 +72,12 @@ isOneToOne: false
       columns: ["category_id","team_id"]
 isOneToOne: false
       referencedRelation: "categories"
+      referencedColumns: ["id","team_id"]
+    },{
+      foreignKeyName: "catalog_items_group_id_team_id_fkey"
+      columns: ["group_id","team_id"]
+isOneToOne: false
+      referencedRelation: "product_groups"
       referencedColumns: ["id","team_id"]
     },{
       foreignKeyName: "catalog_items_team_id_fkey"
@@ -121,6 +127,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "order_batches_team_id_fkey"
+      columns: ["team_id"]
+isOneToOne: false
+      referencedRelation: "teams"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"product_groups": {
+                  Row: {
+                    "archived_at": string | null,"attribute_names": (string)[],"category_id": string | null,"created_at": string,"description": string | null,"icon": string | null,"id": string,"name": string,"sort_order": number,"team_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "archived_at"?: string | null,"attribute_names"?: (string)[],"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"icon"?: string | null,"id"?: string,"name": string,"sort_order"?: number,"team_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "archived_at"?: string | null,"attribute_names"?: (string)[],"category_id"?: string | null,"created_at"?: string,"description"?: string | null,"icon"?: string | null,"id"?: string,"name"?: string,"sort_order"?: number,"team_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "product_groups_category_id_team_id_fkey"
+      columns: ["category_id","team_id"]
+isOneToOne: false
+      referencedRelation: "categories"
+      referencedColumns: ["id","team_id"]
+    },{
+      foreignKeyName: "product_groups_team_id_fkey"
       columns: ["team_id"]
 isOneToOne: false
       referencedRelation: "teams"

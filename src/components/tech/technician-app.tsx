@@ -32,7 +32,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { PublicCatalogItem, PublicCategory } from "@/lib/data/public";
+import type { PublicCatalogItem, PublicCategory, PublicProductGroup } from "@/lib/data/public";
+import { SupplyIcon, isSupplyIconName } from "@/components/icons/supply-icons";
+import { groupSummary, resolveSelection, type Attributes } from "@/lib/variants";
 import { cn, formatQty, plural, safeHttpUrl } from "@/lib/utils";
 import { ChangeNameDialog, NameGate, QuantityStepper, TechHeader, useLocalJson, useTechnicianName } from "./shared";
 
@@ -58,12 +60,14 @@ export function TechnicianApp({
   slug,
   teamName,
   categories,
+  groups,
   items,
   popularIds,
 }: {
   slug: string;
   teamName: string;
   categories: PublicCategory[];
+  groups: PublicProductGroup[];
   items: PublicCatalogItem[];
   popularIds: string[];
 }) {
@@ -74,17 +78,34 @@ export function TechnicianApp({
   const [otherOpen, setOtherOpen] = React.useState(false);
   const [nameOpen, setNameOpen] = React.useState(false);
   const [submitted, setSubmitted] = React.useState<SubmittedSummary | null>(null);
+  const [openGroup, setOpenGroup] = React.useState<string | null>(null);
 
   const itemsById = React.useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
   const popular = popularIds.map((id) => itemsById.get(id)).filter((i): i is PublicCatalogItem => !!i);
 
-  const groups = React.useMemo(() => {
+  const groupById = React.useMemo(() => new Map(groups.map((g) => [g.id, g])), [groups]);
+  const iconFor = (item: PublicCatalogItem) => (item.group_id ? groupById.get(item.group_id)?.icon : item.icon) ?? null;
+
+  // Each category lists product groups (one card per group) and standalone items, in display order.
+  const sections = React.useMemo(() => {
     const all = [...categories, { id: UNCATEGORIZED, name: "Other supplies" }];
     return all
-      .map((c) => ({ ...c, items: items.filter((i) => (i.category_id ?? UNCATEGORIZED) === c.id) }))
-      .filter((g) => g.items.length > 0);
-  }, [categories, items]);
-  const current = groups.find((g) => g.id === openCategory) ?? null;
+      .map((c) => {
+        const inCat = items.filter((i) => (i.category_id ?? UNCATEGORIZED) === c.id);
+        const entries: Entry[] = [
+          ...groups
+            .filter((g) => (g.category_id ?? UNCATEGORIZED) === c.id)
+            .map((g) => ({ kind: "group" as const, group: g, variants: inCat.filter((i) => i.group_id === g.id), sort: g.sort_order }))
+            .filter((e) => e.variants.length > 0),
+          ...inCat.filter((i) => !i.group_id).map((i) => ({ kind: "item" as const, item: i, sort: i.sort_order })),
+        ].sort((a, b) => a.sort - b.sort);
+        return { ...c, items: inCat, entries };
+      })
+      .filter((s) => s.entries.length > 0);
+  }, [categories, groups, items]);
+  const current = sections.find((g) => g.id === openCategory) ?? null;
+  const sheetGroup = openGroup ? groupById.get(openGroup) ?? null : null;
+  const sheetVariants = sheetGroup ? items.filter((i) => i.group_id === sheetGroup.id) : [];
 
   // Phone back button closes a category instead of leaving the page.
   React.useEffect(() => {
@@ -171,9 +192,25 @@ export function TechnicianApp({
               {current.name}
             </h1>
             <ul className="mb-6 divide-y overflow-hidden rounded-2xl border bg-card">
-              {current.items.map((item) => (
-                <CatalogRow key={item.id} item={item} qty={cart.items[item.id] ?? 0} onQty={(q) => setQty(item.id, q)} />
-              ))}
+              {current.entries.map((e) =>
+                e.kind === "group" ? (
+                  <GroupRow
+                    key={e.group.id}
+                    group={e.group}
+                    variants={e.variants}
+                    added={e.variants.filter((v) => (cart.items[v.id] ?? 0) > 0).length}
+                    onOpen={() => setOpenGroup(e.group.id)}
+                  />
+                ) : (
+                  <CatalogRow
+                    key={e.item.id}
+                    item={e.item}
+                    icon={iconFor(e.item)}
+                    qty={cart.items[e.item.id] ?? 0}
+                    onQty={(q) => setQty(e.item.id, q)}
+                  />
+                ),
+              )}
             </ul>
             {otherItemCard}
           </main>
@@ -187,19 +224,25 @@ export function TechnicianApp({
               </h2>
               <ul className="divide-y overflow-hidden rounded-2xl border bg-card">
                 {popular.map((item) => (
-                  <CatalogRow key={item.id} item={item} qty={cart.items[item.id] ?? 0} onQty={(q) => setQty(item.id, q)} />
+                  <CatalogRow
+                    key={item.id}
+                    item={item}
+                    icon={iconFor(item)}
+                    qty={cart.items[item.id] ?? 0}
+                    onQty={(q) => setQty(item.id, q)}
+                  />
                 ))}
               </ul>
             </section>
           )}
 
-          {groups.length > 0 ? (
+          {sections.length > 0 ? (
             <section className="mb-6" aria-labelledby="categories-heading">
               <h2 id="categories-heading" className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
                 Categories
               </h2>
               <div className="grid grid-cols-2 gap-3">
-                {groups.map((g) => {
+                {sections.map((g) => {
                   const added = addedIn(g);
                   return (
                     <button
@@ -211,7 +254,7 @@ export function TechnicianApp({
                       <CategoryIcon name={g.name} size="lg" />
                       <span>
                         <span className="block font-semibold leading-snug">{g.name}</span>
-                        <span className="text-sm text-muted-foreground">{plural(g.items.length, "item")}</span>
+                        <span className="text-sm text-muted-foreground">{plural(g.entries.length, "product")}</span>
                       </span>
                       {added > 0 && (
                         <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
@@ -274,8 +317,177 @@ export function TechnicianApp({
         }}
       />
 
+      <VariantSheet
+        group={sheetGroup}
+        variants={sheetVariants}
+        cart={cart.items}
+        onClose={() => setOpenGroup(null)}
+        onAdd={(variant, qty) => {
+          setQty(variant.id, (cart.items[variant.id] ?? 0) + qty);
+          toast.success(`Added ${variant.name} × ${qty}`);
+          setOpenGroup(null);
+        }}
+        onRemove={(variant) => setQty(variant.id, 0)}
+      />
+
       <ChangeNameDialog open={nameOpen} onOpenChange={setNameOpen} name={name} onSave={setName} />
     </div>
+  );
+}
+
+type Entry =
+  | { kind: "group"; group: PublicProductGroup; variants: PublicCatalogItem[]; sort: number }
+  | { kind: "item"; item: PublicCatalogItem; sort: number };
+
+function ProductIcon({ icon, className }: { icon: string | null | undefined; className?: string }) {
+  return (
+    <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground/85", className)} aria-hidden>
+      {isSupplyIconName(icon) ? <SupplyIcon name={icon} className="size-7" /> : <Package className="size-6 text-muted-foreground" />}
+    </span>
+  );
+}
+
+function GroupRow({
+  group,
+  variants,
+  added,
+  onOpen,
+}: {
+  group: PublicProductGroup;
+  variants: PublicCatalogItem[];
+  added: number;
+  onOpen: () => void;
+}) {
+  const summary = groupSummary(variants, group.attribute_names);
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cn("flex w-full items-center gap-3 p-3 text-left hover:bg-muted/60 active:bg-muted", added > 0 && "bg-accent/40")}
+        aria-label={`Choose ${group.name}`}
+      >
+        <ProductIcon icon={group.icon} />
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium leading-snug">{group.name}</span>
+          <span className="block truncate text-sm text-muted-foreground">{summary || group.description}</span>
+        </span>
+        {added > 0 && <Badge variant="primary">{added} added</Badge>}
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-primary/15 text-primary">
+          <ChevronRight className="size-5" />
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/** One bottom sheet: pick each attribute (auto-picked when there's one option), set quantity, add. */
+function VariantSheet({
+  group,
+  variants,
+  cart,
+  onClose,
+  onAdd,
+  onRemove,
+}: {
+  group: PublicProductGroup | null;
+  variants: PublicCatalogItem[];
+  cart: Record<string, number>;
+  onClose: () => void;
+  onAdd: (variant: PublicCatalogItem, qty: number) => void;
+  onRemove: (variant: PublicCatalogItem) => void;
+}) {
+  const [picked, setPicked] = React.useState<Attributes>({});
+  const [qty, setQty] = React.useState(1);
+  React.useEffect(() => {
+    setPicked({});
+    setQty(1);
+  }, [group?.id]);
+
+  const resolved = group ? resolveSelection(variants, group.attribute_names, picked) : null;
+  const variant = resolved?.variant ? (variants.find((v) => v.id === resolved.variant!.id) ?? null) : null;
+  const inCart = variants.filter((v) => (cart[v.id] ?? 0) > 0);
+  const remaining = resolved ? resolved.steps.filter((s) => !s.value).map((s) => s.name.toLowerCase()) : [];
+
+  return (
+    <Dialog open={!!group} onOpenChange={(o) => !o && onClose()}>
+      {/* Don't auto-focus the quantity field: it would pop the phone keyboard. */}
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+        {group && resolved && (
+          <>
+            <DialogHeader className="flex-row items-center gap-3">
+              <ProductIcon icon={group.icon} className="size-11" />
+              <div className="min-w-0">
+                <DialogTitle>{group.name}</DialogTitle>
+                {group.description && <DialogDescription>{group.description}</DialogDescription>}
+              </div>
+            </DialogHeader>
+            <DialogBody className="grid gap-5 pb-4">
+              {resolved.steps.map((step) => (
+                <fieldset key={step.name} className="grid gap-2">
+                  <legend className="mb-2 text-sm font-medium text-muted-foreground">{step.name}</legend>
+                  <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={step.name}>
+                    {step.options.map((option) => {
+                      const selected = step.value === option;
+                      const only = step.options.length === 1;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          disabled={only}
+                          onClick={() => setPicked((p) => ({ ...resolved.selection, ...p, [step.name]: option }))}
+                          className={cn(
+                            "h-12 min-w-16 rounded-xl border px-4 text-base font-medium transition-colors",
+                            selected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-card hover:border-input hover:bg-muted active:bg-muted",
+                            only && "disabled:opacity-100",
+                          )}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              ))}
+
+              <div className="grid gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Quantity</span>
+                <div className="flex items-center justify-between gap-3">
+                  <QuantityStepper value={qty} onChange={setQty} label={group.name} min={1} />
+                  {variant?.unit && variant.unit !== "each" && <span className="text-sm text-muted-foreground">per {variant.unit}</span>}
+                </div>
+              </div>
+
+              {inCart.length > 0 && (
+                <div className="grid gap-1.5 rounded-xl border bg-muted/40 p-3 text-sm">
+                  <span className="text-xs font-medium text-muted-foreground">Already in your request</span>
+                  {inCart.map((v) => (
+                    <div key={v.id} className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 truncate">
+                        {v.name} <span className="text-muted-foreground">× {cart[v.id]}</span>
+                      </span>
+                      <button type="button" onClick={() => onRemove(v)} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" aria-label={`Remove ${v.name}`}>
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </DialogBody>
+            <DialogFooter>
+              <Button size="xl" className="w-full sm:h-12" disabled={!variant} onClick={() => variant && onAdd(variant, qty)}>
+                <Plus className="size-5" />
+                {variant ? `Add to request` : `Choose ${remaining.join(" and ")}`}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -288,7 +500,7 @@ function CategoryIcon({ name, size = "md" }: { name: string; size?: "md" | "lg" 
   );
 }
 
-function ItemThumb({ item }: { item: Pick<PublicCatalogItem, "image_url" | "name"> }) {
+function ItemThumb({ item, icon }: { item: Pick<PublicCatalogItem, "image_url" | "name">; icon?: string | null }) {
   const src = safeHttpUrl(item.image_url);
   const [failed, setFailed] = React.useState(false);
   if (src && !failed) {
@@ -302,14 +514,24 @@ function ItemThumb({ item }: { item: Pick<PublicCatalogItem, "image_url" | "name
       />
     );
   }
-  // No photo: skip the placeholder so the list stays clean.
-  return null;
+  // No photo: show the product's line icon, or nothing so the list stays clean.
+  return isSupplyIconName(icon) ? <ProductIcon icon={icon} /> : null;
 }
 
-function CatalogRow({ item, qty, onQty }: { item: PublicCatalogItem; qty: number; onQty: (q: number) => void }) {
+function CatalogRow({
+  item,
+  icon,
+  qty,
+  onQty,
+}: {
+  item: PublicCatalogItem;
+  icon?: string | null;
+  qty: number;
+  onQty: (q: number) => void;
+}) {
   return (
     <li className={cn("flex items-center gap-3 p-3", qty > 0 && "bg-accent/40")}>
-      <ItemThumb item={item} />
+      <ItemThumb item={item} icon={icon} />
       <div className="min-w-0 flex-1">
         <p className="font-medium leading-snug">{item.name}</p>
         {(item.description || (item.unit && item.unit !== "each")) && (

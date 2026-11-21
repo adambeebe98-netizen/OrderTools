@@ -41,7 +41,7 @@ describe.skipIf(!reachable)("database security & logic", () => {
     const { data: teams } = await service.from("teams").select("id, slug");
     teamA = teams!.find((t) => t.slug === "north-install-demo")!.id;
     teamB = teams!.find((t) => t.slug === "south-install-demo")!.id;
-    const { data: a } = await service.from("catalog_items").select("id").eq("team_id", teamA).limit(1).single();
+    const { data: a } = await service.from("catalog_items").select("id").eq("team_id", teamA).is("archived_at", null).limit(1).single();
     const { data: b } = await service.from("catalog_items").select("id").eq("team_id", teamB).limit(1).single();
     catalogA = a!.id;
     catalogB = b!.id;

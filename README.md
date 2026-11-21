@@ -111,7 +111,17 @@ node --env-file=.env.production.local node_modules/.bin/tsx scripts/bootstrap.mt
 
 ### 4. Load your catalog
 
-Sign in → **Catalog → CSV import**. Columns: `name` (required), `category`, `unit`, `description`, `grainger_sku`, `grainger_url`, `image_url`. See [`docs/sample-catalog.csv`](docs/sample-catalog.csv). Re-importing updates matching items (by SKU, then name).
+Sign in → **Catalog → CSV import**. Columns: `name`, `category`, `group`, `options`, `icon`, `unit`, `description`, `grainger_sku`, `grainger_url`, `image_url` (and `id` from an export). See [`docs/sample-catalog.csv`](docs/sample-catalog.csv).
+
+- Simple products: fill `name` (and optionally `icon`).
+- Products with variants: fill `group` and `options`, e.g. `group = Long Bit`, `options = Type: Masonry | Size: 3/8"`. The name is generated (`Long Bit — Masonry — 3/8"`). Each row is its own purchasable item with its own SKU.
+- Re-importing updates in place, matching by `id`, then group + options, then SKU, then name — so IDs and SKUs are preserved and duplicates aren't created. **Export current catalog** produces a file in the same format.
+
+### Product groups & variants
+
+A *product group* (e.g. "Long Bit") is one card for technicians; tapping it opens a sheet where they pick each option (Type → Size), set a quantity and add. Options with a single choice are pre-selected. Each variant is a separate catalog row, so requests, the shopping list and Grainger SKUs always identify the exact variant. Managers create groups, variants, icons and the display order under **Catalog → Products**. Items that have been requested can be archived (hidden) but not deleted, so history stays accurate.
+
+The one-time reorganization of the original flat drill-bit list lives in [`supabase/catalog-reorganize.sql`](supabase/catalog-reorganize.sql) (generated from `scripts/catalog_def.py`); it only renames/groups/archives items and verifies request data is unchanged.
 
 ### 5. Roll out
 

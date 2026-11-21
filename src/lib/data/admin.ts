@@ -201,7 +201,7 @@ export async function getOutstandingItems(db: DB, teamId: string): Promise<Outst
   const { data, error } = await db
     .from("request_items")
     .select(
-      "id, request_id, catalog_item_id, name, unit, grainger_sku, grainger_url, quantity, is_custom, custom_note, custom_url, requests!inner(created_at, technician_id, technician_name, removed_at)",
+      "id, request_id, catalog_item_id, name, unit, grainger_sku, grainger_url, quantity, is_custom, custom_note, custom_url, requests!inner(created_at, technician_id, technician_name, removed_at), catalog_items(name)",
     )
     .eq("team_id", teamId)
     .eq("status", "requested")
@@ -216,7 +216,9 @@ export async function getOutstandingItems(db: DB, teamId: string): Promise<Outst
     technician_id: row.requests.technician_id,
     technician_name: row.requests.technician_name,
     catalog_item_id: row.catalog_item_id,
-    name: row.name,
+    // Linked items show the product's current name (e.g. after regrouping into variants),
+    // so every line for one variant reads the same. The request keeps its original snapshot.
+    name: row.catalog_items?.name ?? row.name,
     unit: row.unit,
     grainger_sku: row.grainger_sku,
     grainger_url: row.grainger_url,
@@ -228,15 +230,31 @@ export async function getOutstandingItems(db: DB, teamId: string): Promise<Outst
 }
 
 export async function getCatalog(db: DB, teamId: string) {
-  const [cats, items] = await Promise.all([
+  const [cats, items, groups, requested] = await Promise.all([
     db.from("categories").select("id, name, sort_order, archived_at").eq("team_id", teamId).order("sort_order").order("name"),
     db
       .from("catalog_items")
-      .select("id, name, description, image_url, unit, grainger_sku, grainger_url, category_id, sort_order, archived_at, updated_at")
+      .select(
+        "id, name, description, image_url, unit, grainger_sku, grainger_url, category_id, group_id, attributes, icon, sort_order, archived_at, updated_at",
+      )
       .eq("team_id", teamId)
+      .order("sort_order")
       .order("name"),
+    db
+      .from("product_groups")
+      .select("id, name, description, icon, category_id, attribute_names, sort_order, archived_at")
+      .eq("team_id", teamId)
+      .order("sort_order")
+      .order("name"),
+    // Which items have ever been requested (those can be archived but not deleted).
+    db.from("request_items").select("catalog_item_id").eq("team_id", teamId).not("catalog_item_id", "is", null).limit(10000),
   ]);
-  return { categories: cats.data ?? [], items: items.data ?? [] };
+  return {
+    categories: cats.data ?? [],
+    items: (items.data ?? []).map((i) => ({ ...i, attributes: (i.attributes ?? {}) as Record<string, string> })),
+    groups: groups.data ?? [],
+    requestedIds: [...new Set((requested.data ?? []).map((r) => r.catalog_item_id as string))],
+  };
 }
 
 export type CustomItemSummary = {

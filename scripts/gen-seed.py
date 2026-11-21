@@ -1,5 +1,10 @@
 # Generates supabase/seed.sql (development data only).
-import uuid, json
+import uuid, json, os, sys
+sys.path.insert(0, os.path.dirname(__file__))
+from catalog_def import FLAT_CATALOG
+import importlib.util
+_spec = importlib.util.spec_from_file_location('gencat', os.path.join(os.path.dirname(__file__), 'gen-catalog-sql.py'))
+_gencat = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_gencat)
 NS = uuid.UUID('6f1d6a3e-8c1e-4d7a-9a51-2b1c0d9e7f10')
 def uid(s): return str(uuid.uuid5(NS, s))
 def q(s): return "null" if s is None else "'" + str(s).replace("'", "''") + "'"
@@ -78,33 +83,46 @@ out.append(f"insert into public.teams (id, name, slug) values ('{teamA}', 'North
 out.append(f"insert into public.team_members (team_id, user_id, last_seen_at) values ('{teamA}', '{uid('manager@example.com')}', now() - interval '2 days'), ('{teamB}', '{uid('other@example.com')}', now());")
 
 items = {}
-for i, (cat, rows) in enumerate(catalog.items()):
-    for team, tkey in ((teamA, 'A'), (teamB, 'B')):
-        cid = uid(f'cat-{tkey}-{cat}')
-        out.append(f"insert into public.categories (id, team_id, name, sort_order) values ('{cid}', '{team}', {q(cat)}, {i});")
-        for j, (name, desc, unit, sku) in enumerate(rows):
-            iid = uid(f'item-{tkey}-{name}')
-            items[(tkey, name)] = (iid, unit, sku)
-            out.append(f"insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('{iid}', '{team}', '{cid}', {q(name)}, {q(desc)}, {q(unit)}, {q(sku)}, {q(gsearch(name.split(',')[0].split('(')[0].strip()))}, {j});")
+# --- North team: the real catalog, flat, exactly as first imported in production.
+north_cats = []
+for name, cat, unit, desc in FLAT_CATALOG:
+    if cat not in north_cats: north_cats.append(cat)
+for i, cat in enumerate(north_cats):
+    out.append(f"insert into public.categories (id, team_id, name, sort_order) values ('{uid('cat-A-'+cat)}', '{teamA}', {q(cat)}, {i});")
+for j, (name, cat, unit, desc) in enumerate(FLAT_CATALOG):
+    iid = uid('item-A-' + name)
+    items[('A', name)] = iid
+    out.append(f"insert into public.catalog_items (id, team_id, category_id, name, description, unit, sort_order) values ('{iid}', '{teamA}', '{uid('cat-A-'+cat)}', {q(name)}, {q(desc)}, {q(unit)}, {j});")
+# One item gets a SKU to prove SKUs survive the reorganization.
+out.append(f"update public.catalog_items set grainger_sku = 'DEMO-1001', grainger_url = 'https://www.grainger.com/search?searchQuery=masonry+bit' where id = '{items[('A', 'Long Masonry Bit 3/8\"')]}';")
 
-# Sample requests for team A (via submit_request so triggers + activity run)
+# --- South team: legacy demo catalog (no variants).
+for i, (cat, rows) in enumerate(catalog.items()):
+    cid = uid(f'cat-B-{cat}')
+    out.append(f"insert into public.categories (id, team_id, name, sort_order) values ('{cid}', '{teamB}', {q(cat)}, {i});")
+    for j, (name, desc, unit, sku) in enumerate(rows):
+        iid = uid(f'item-B-{name}')
+        items[('B', name)] = iid
+        out.append(f"insert into public.catalog_items (id, team_id, category_id, name, description, unit, grainger_sku, grainger_url, sort_order) values ('{iid}', '{teamB}', '{cid}', {q(name)}, {q(desc)}, {q(unit)}, {q(sku)}, {q(gsearch(name.split(',')[0].split('(')[0].strip()))}, {j});")
+
+# Sample requests for team A, made against the FLAT catalog (like production).
 reqs = [
- ("Mike Torres", [("Masonry Drill Bit 1/4\" x 6\"", 2), ("Electrical Tape, Black 3/4\" x 66'", 4), ("Drywall Anchors, Self-Drilling #8", 1)], None, '3 days'),
- ("Sarah Kim", [("Masonry Drill Bit 1/4\" x 6\"", 1), ("Fish Rod Kit (Glow Rods)", 1), ("Cable Ties 8\" Black UV", 2)], "Lost my glow rods on the Henderson job.", '2 days'),
- ("Jordan Lee", [("Electrical Tape, Black 3/4\" x 66'", 2), ("Wago 221 Lever Connectors (3-port)", 1), ("Shoe Covers", 1)], None, '1 day'),
- ("Mike Torres", [("Toggle Bolts 1/8\" (Snaptoggle)", 2), ("Masonry Drill Bit 1/4\" x 6\"", 1)], None, '5 hours'),
- ("Priya Patel", [("Shoe Covers", 2), ("Nitrile Gloves (L)", 1), ("Electrical Tape, Black 3/4\" x 66'", 3)], None, '40 minutes'),
+ ("Mike Torres", [('Long Masonry Bit 3/8"', 2), ("Electrical Tape", 4), ("Zip Ties", 1)], None, '3 days'),
+ ("Sarah Kim", [('Long Wood Bit 1/4"', 1), ("Dolphin Beans", 2), ("Zip Ties", 2)], "Out of beans on the Henderson job.", '2 days'),
+ ("Jordan Lee", [('Short Wood Bit 1/4"', 2), ("Electrical Tape", 2), ("RJ45 Connectors", 1)], None, '1 day'),
+ ("Mike Torres", [("Screws", 2), ('Long Masonry Bit 3/8"', 1)], None, '5 hours'),
+ ("Priya Patel", [("Dolphin Beans", 1), ("Zip Ties", 1), ("Electrical Tape", 3)], None, '40 minutes'),
 ]
 for k, (tech, lines, note, ago) in enumerate(reqs):
-    arr = [{"catalog_item_id": items[('A', n)][0], "quantity": qn} for n, qn in lines]
+    arr = [{"catalog_item_id": items[('A', n)], "quantity": qn} for n, qn in lines]
     if k == 1:
         arr.append({"custom_name": "Right-angle drill attachment", "quantity": 1, "custom_note": "For tight joist bays", "custom_url": None})
     if k == 4:
         arr.append({"custom_name": "Right angle drill attachment", "quantity": 1, "custom_note": None, "custom_url": None})
     out.append(f"select public.submit_request('north-install-demo', {q(tech)}, {q(json.dumps(arr))}::jsonb, {q(note)});")
     out.append(f"update public.requests set created_at = now() - interval '{ago}' where id = (select id from public.requests order by created_at desc, id limit 1) and created_at > now() - interval '1 minute';")
-# Make one older request fully ordered
-out.append(f"""select public.submit_request('north-install-demo', 'Jordan Lee', '[{{"catalog_item_id":"{items[('A','Utility Knife Blades')][0]}","quantity":2}}]'::jsonb, null);""")
+# One older request fully ordered
+out.append(f"""select public.submit_request('north-install-demo', 'Jordan Lee', '[{{"catalog_item_id":"{items[('A','Staples')]}","quantity":2}}]'::jsonb, null);""")
 out.append("""with r as (select id from public.requests where technician_name = 'Jordan Lee' order by created_at desc limit 1)
 update public.requests set created_at = now() - interval '9 days' where id in (select id from r);""")
 out.append("""update public.request_items set status = 'ordered', ordered_at = now() - interval '7 days'
@@ -112,6 +130,9 @@ out.append("""update public.request_items set status = 'ordered', ordered_at = n
 out.append("update public.activity_events set created_at = r.created_at from public.requests r where r.id = activity_events.request_id;")
 
 # Team B sample
-out.append(f"""select public.submit_request('south-install-demo', 'Chris Ortega', '[{{"catalog_item_id":"{items[('B','Fish Tape 50\'')][0]}","quantity":1}}]'::jsonb, null);""".replace("Fish Tape 50\\'", "Fish Tape 50'"))
+out.append(f"""select public.submit_request('south-install-demo', 'Chris Ortega', '[{{"catalog_item_id":"{items[('B','Fish Tape 50\'')]}","quantity":1}}]'::jsonb, null);""")
+
+# Reorganize the North catalog into product groups exactly as production will be.
+out.append(_gencat.reorganize_sql('north-install-demo'))
 open('supabase/seed.sql', 'w').write("\n".join(out) + "\n")
 print("ok", len(out))

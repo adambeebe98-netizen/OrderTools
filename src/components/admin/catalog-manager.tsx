@@ -10,10 +10,8 @@ import {
   ExternalLink,
   FileUp,
   ImagePlus,
-  Package,
   Pencil,
   Plus,
-  Search,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { Field } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { EmptyState, Spinner } from "@/components/ui/misc";
 import {
   Dialog,
@@ -37,26 +34,16 @@ import {
   importCatalog,
   reorderCategories,
   saveCatalogItem,
-  setCatalogItemArchived,
   updateCategory,
   uploadCatalogImage,
 } from "@/lib/actions/catalog";
-import { CATALOG_CSV_TEMPLATE, parseCatalogCsv, type CatalogImportResult } from "@/lib/csv";
+import { CATALOG_CSV_TEMPLATE, catalogToCsv, parseCatalogCsv, type CatalogImportResult } from "@/lib/csv";
+import { IconPicker, ProductsTab, type AdminGroup, type AdminItem } from "@/components/admin/catalog-products";
 import type { CustomItemSummary } from "@/lib/data/admin";
 import { cn, plural, safeHttpUrl, timeAgo } from "@/lib/utils";
 
 type Category = { id: string; name: string; sort_order: number; archived_at: string | null };
-type Item = {
-  id: string;
-  name: string;
-  description: string | null;
-  image_url: string | null;
-  unit: string | null;
-  grainger_sku: string | null;
-  grainger_url: string | null;
-  category_id: string | null;
-  archived_at: string | null;
-};
+type Item = AdminItem;
 type Tab = "items" | "categories" | "custom" | "import";
 
 type Draft = {
@@ -68,6 +55,7 @@ type Draft = {
   grainger_sku: string;
   grainger_url: string;
   image_url: string;
+  icon: string;
   linkCustomItemIds?: string[];
 };
 
@@ -80,18 +68,23 @@ const emptyDraft = (): Draft => ({
   grainger_sku: "",
   grainger_url: "",
   image_url: "",
+  icon: "",
 });
 
 export function CatalogManager({
   teamId,
   categories,
   items,
+  groups,
+  requestedIds,
   custom,
   initialTab,
 }: {
   teamId: string;
   categories: Category[];
   items: Item[];
+  groups: AdminGroup[];
+  requestedIds: string[];
   custom: CustomItemSummary[];
   initialTab: Tab;
 }) {
@@ -106,7 +99,11 @@ export function CatalogManager({
   };
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: "items", label: "Items", count: items.filter((i) => !i.archived_at).length },
+    {
+      id: "items",
+      label: "Products",
+      count: groups.filter((g) => !g.archived_at).length + items.filter((i) => !i.archived_at && !i.group_id).length,
+    },
     { id: "categories", label: "Categories", count: categories.filter((c) => !c.archived_at).length },
     { id: "custom", label: "Other requests", count: custom.length },
     { id: "import", label: "CSV import" },
@@ -136,7 +133,29 @@ export function CatalogManager({
         </div>
       </div>
 
-      {tab === "items" && <ItemsTab teamId={teamId} categories={categories} items={items} onEdit={setDraft} />}
+      {tab === "items" && (
+        <ProductsTab
+          teamId={teamId}
+          categories={categories}
+          groups={groups}
+          items={items}
+          requestedIds={requestedIds}
+          onAddItem={() => setDraft(emptyDraft())}
+          onEditItem={(item) =>
+            setDraft({
+              id: item.id,
+              name: item.name,
+              category_id: item.category_id ?? "",
+              description: item.description ?? "",
+              unit: item.unit ?? "",
+              grainger_sku: item.grainger_sku ?? "",
+              grainger_url: item.grainger_url ?? "",
+              image_url: item.image_url ?? "",
+              icon: item.icon ?? "",
+            })
+          }
+        />
+      )}
       {tab === "categories" && <CategoriesTab teamId={teamId} categories={categories} items={items} />}
       {tab === "custom" && (
         <CustomTab
@@ -151,138 +170,38 @@ export function CatalogManager({
           }
         />
       )}
-      {tab === "import" && <ImportTab teamId={teamId} onDone={() => setTab("items")} />}
+      {tab === "import" && (
+        <ImportTab
+          teamId={teamId}
+          onDone={() => setTab("items")}
+          exportCsv={() =>
+            catalogToCsv(
+              items
+                .filter((i) => !i.archived_at)
+                .map((i) => {
+                  const g = i.group_id ? groups.find((x) => x.id === i.group_id) : null;
+                  return {
+                    id: i.id,
+                    name: i.name,
+                    category: categories.find((c) => c.id === (g ? g.category_id : i.category_id))?.name ?? null,
+                    group: g?.name ?? null,
+                    attribute_names: g?.attribute_names ?? [],
+                    attributes: i.attributes,
+                    icon: g ? g.icon : i.icon,
+                    unit: i.unit,
+                    description: i.description,
+                    grainger_sku: i.grainger_sku,
+                    grainger_url: i.grainger_url,
+                    image_url: i.image_url,
+                  };
+                }),
+            )
+          }
+        />
+      )}
 
       <ItemDialog teamId={teamId} draft={draft} categories={categories} onClose={() => setDraft(null)} />
     </div>
-  );
-}
-
-function ItemsTab({
-  teamId,
-  categories,
-  items,
-  onEdit,
-}: {
-  teamId: string;
-  categories: Category[];
-  items: Item[];
-  onEdit: (d: Draft) => void;
-}) {
-  const router = useRouter();
-  const [q, setQ] = React.useState("");
-  const [cat, setCat] = React.useState("");
-  const [showArchived, setShowArchived] = React.useState(false);
-  const catName = new Map(categories.map((c) => [c.id, c.name]));
-
-  const visible = items.filter((i) => {
-    if (!showArchived && i.archived_at) return false;
-    if (cat === "none" ? i.category_id : cat && i.category_id !== cat) return false;
-    const hay = `${i.name} ${i.grainger_sku ?? ""} ${i.description ?? ""}`.toLowerCase();
-    return q.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t));
-  });
-
-  const toggleArchive = async (item: Item) => {
-    const res = await setCatalogItemArchived(teamId, item.id, !item.archived_at);
-    if (!res.ok) return void toast.error(res.error);
-    toast.success(item.archived_at ? `Restored ${item.name}` : `Archived ${item.name}`);
-    router.refresh();
-  };
-
-  return (
-    <>
-      <div className="grid gap-2 sm:grid-cols-[1fr_200px_auto_auto] sm:items-center">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input placeholder="Search name or SKU" aria-label="Search catalog" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
-        </div>
-        <NativeSelect aria-label="Category" value={cat} onChange={(e) => setCat(e.target.value)}>
-          <option value="">All categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-              {c.archived_at ? " (archived)" : ""}
-            </option>
-          ))}
-          <option value="none">No category</option>
-        </NativeSelect>
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Switch checked={showArchived} onCheckedChange={setShowArchived} /> Show archived
-        </label>
-        <Button onClick={() => onEdit(emptyDraft())}>
-          <Plus /> Add item
-        </Button>
-      </div>
-
-      {visible.length === 0 ? (
-        <EmptyState
-          icon={<Package />}
-          title={items.length === 0 ? "Your catalog is empty" : "No matching items"}
-          description={items.length === 0 ? "Add items one at a time or import a CSV." : "Try a different search or filter."}
-        />
-      ) : (
-        <ul className="divide-y overflow-hidden rounded-xl border bg-card">
-          {visible.map((item) => {
-            const img = safeHttpUrl(item.image_url);
-            return (
-              <li key={item.id} className={cn("flex items-center gap-3 px-3 py-2.5", item.archived_at && "opacity-60")}>
-                {img ? (
-                  <img src={img} alt="" loading="lazy" className="size-10 shrink-0 rounded-lg border object-cover" />
-                ) : (
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <Package className="size-4" aria-hidden />
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{item.name}</span>
-                    {item.archived_at && <Badge variant="outline">Archived</Badge>}
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                    <span>{item.category_id ? catName.get(item.category_id) : "No category"}</span>
-                    {item.unit && <span>per {item.unit}</span>}
-                    {item.grainger_sku && <span className="font-mono">SKU {item.grainger_sku}</span>}
-                    {safeHttpUrl(item.grainger_url) && (
-                      <a href={item.grainger_url!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 text-primary hover:underline">
-                        Grainger <ExternalLink className="size-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Edit ${item.name}`}
-                  onClick={() =>
-                    onEdit({
-                      id: item.id,
-                      name: item.name,
-                      category_id: item.category_id ?? "",
-                      description: item.description ?? "",
-                      unit: item.unit ?? "",
-                      grainger_sku: item.grainger_sku ?? "",
-                      grainger_url: item.grainger_url ?? "",
-                      image_url: item.image_url ?? "",
-                    })
-                  }
-                >
-                  <Pencil />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={item.archived_at ? `Restore ${item.name}` : `Archive ${item.name}`}
-                  title={item.archived_at ? "Restore" : "Archive (hide from technicians)"}
-                  onClick={() => toggleArchive(item)}
-                >
-                  {item.archived_at ? <ArchiveRestore /> : <Archive />}
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </>
   );
 }
 
@@ -390,7 +309,11 @@ function ItemDialog({
                 <Input id="item-url" type="url" value={d.grainger_url} onChange={set("grainger_url")} placeholder="https://www.grainger.com/product/…" />
               </Field>
             </div>
-            <Field label="Image (optional)" htmlFor="item-img">
+            <div className="grid gap-2">
+              <span className="text-sm font-medium">Icon</span>
+              <IconPicker value={d.icon} onChange={(icon) => setD((x) => ({ ...x, icon }))} />
+            </div>
+            <Field label="Photo (optional, replaces the icon)" htmlFor="item-img">
               <div className="flex items-center gap-3">
                 {img ? (
                   <img src={img} alt="" className="size-14 shrink-0 rounded-lg border object-cover" />
@@ -589,7 +512,7 @@ function CustomTab({ custom, onConvert }: { custom: CustomItemSummary[]; onConve
   );
 }
 
-function ImportTab({ teamId, onDone }: { teamId: string; onDone: () => void }) {
+function ImportTab({ teamId, onDone, exportCsv }: { teamId: string; onDone: () => void; exportCsv: () => string }) {
   const router = useRouter();
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<CatalogImportResult | null>(null);
@@ -606,6 +529,7 @@ function ImportTab({ teamId, onDone }: { teamId: string; onDone: () => void }) {
     setImporting(false);
     if (!res.ok) return void toast.error(res.error);
     toast.success(`Imported: ${res.created} added, ${res.updated} updated${res.skipped ? `, ${res.skipped} skipped` : ""}`);
+    if (res.problems?.length) toast.warning(res.problems.slice(0, 5).join("\n"), { duration: 12000 });
     setText("");
     router.refresh();
     onDone();
@@ -645,6 +569,19 @@ function ImportTab({ teamId, onDone }: { teamId: string; onDone: () => void }) {
           >
             Download template
           </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              const url = URL.createObjectURL(new Blob(["\uFEFF" + exportCsv()], { type: "text/csv;charset=utf-8" }));
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `catalog-${new Date().toISOString().slice(0, 10)}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            Export current catalog
+          </Button>
         </div>
         <Textarea
           rows={10}
@@ -674,7 +611,7 @@ function ImportTab({ teamId, onDone }: { teamId: string; onDone: () => void }) {
                 <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 bg-muted">
                     <tr>
-                      {["Name", "Category", "Unit", "SKU"].map((h) => (
+                      {["Name", "Category", "Group / options", "SKU"].map((h) => (
                         <th key={h} className="px-2 py-1.5 font-medium">
                           {h}
                         </th>
@@ -686,7 +623,9 @@ function ImportTab({ teamId, onDone }: { teamId: string; onDone: () => void }) {
                       <tr key={r.line}>
                         <td className="px-2 py-1">{r.name}</td>
                         <td className="px-2 py-1 text-muted-foreground">{r.category ?? "—"}</td>
-                        <td className="px-2 py-1 text-muted-foreground">{r.unit ?? "—"}</td>
+                        <td className="px-2 py-1 text-muted-foreground">
+                          {r.group ? `${r.group}: ${r.attribute_names.map((n) => r.attributes[n]).join(" · ")}` : "—"}
+                        </td>
                         <td className="px-2 py-1 font-mono text-muted-foreground">{r.grainger_sku ?? "—"}</td>
                       </tr>
                     ))}
